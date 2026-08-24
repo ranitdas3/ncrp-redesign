@@ -50,6 +50,7 @@ body {
   color: var(--ux4g-text-dark);
   line-height: 1.5;
   transition: background-color 0.2s, color 0.2s;
+  text-align: left;
 }
 
 /* Tricolor Top Ribbon */
@@ -71,6 +72,7 @@ body {
   border-radius: 16px;
   box-shadow: var(--ux4g-shadow-md);
   padding: 28px;
+  text-align: left;
 }
 
 /* Category Wireframe Cards */
@@ -129,6 +131,7 @@ body {
 /* Form Controls */
 .ux4g-form-group {
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .ux4g-label {
@@ -136,6 +139,7 @@ body {
   margin-bottom: 6px;
   font-weight: 600;
   color: var(--ux4g-text-dark);
+  text-align: left !important;
 }
 
 .ux4g-label .required {
@@ -159,6 +163,7 @@ body {
   color: var(--ux4g-text-dark);
   box-sizing: border-box;
   transition: border-color 0.2s;
+  text-align: left;
 }
 
 .ux4g-input:focus {
@@ -175,6 +180,7 @@ body {
   color: var(--ux4g-error);
   font-size: 0.875rem;
   margin-top: 4px;
+  text-align: left;
 }
 
 /* Tabs */
@@ -231,6 +237,7 @@ body {
   border-radius: var(--ux4g-radius);
   margin-bottom: 20px;
   font-size: 0.95rem;
+  text-align: left;
 }
 
 .ux4g-alert-error {

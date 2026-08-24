@@ -40,7 +40,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px' }}>
+    <div style={{ maxWidth: '800px', margin: '30px auto', padding: '0 20px', textAlign: 'left' }}>
       
       {/* Back to Categories Button */}
       <button
@@ -62,8 +62,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         ← {currentLang === 'hi' ? 'श्रेणियों पर वापस जाएं' : 'Back to All Categories'}
       </button>
 
-      {/* Progress Steps Header */}
-      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px 24px', marginBottom: '28px', boxShadow: '0 2px 6px rgba(0,0,0,0.03)' }}>
+      {/* Progress Steps Header - Left Aligned */}
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px 24px', marginBottom: '28px', boxShadow: '0 2px 6px rgba(0,0,0,0.03)', textAlign: 'left' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
           {[
             { num: 1, label: 'Sub-Crime' },
@@ -106,20 +106,14 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
       {/* STEP 1: Select Sub-Crime */}
       {currentStep === 1 && (
-        <div className="ux4g-card">
+        <div className="ux4g-card" style={{ textAlign: 'left' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <span style={{ fontSize: '2rem' }}>{category.icon}</span>
-            <div>
-              <h2 style={{ margin: 0, color: '#0A3161', fontSize: '1.4rem' }}>{category.title}</h2>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Select the specific type of incident that occurred</p>
+            <div style={{ textAlign: 'left' }}>
+              <h2 style={{ margin: 0, color: '#0A3161', fontSize: '1.4rem', textAlign: 'left' }}>{category.title}</h2>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', textAlign: 'left' }}>Select the specific type of incident that occurred</p>
             </div>
           </div>
-
-          {category.helplineNotice && (
-            <div className="ux4g-alert ux4g-alert-error" style={{ marginBottom: '20px' }}>
-              ⚡ <strong>Urgent:</strong> {category.helplineNotice}
-            </div>
-          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px', marginBottom: '24px' }}>
             {category.subCrimes.map((sub) => (
@@ -132,9 +126,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   border: selectedSubCrime?.id === sub.id ? '2px solid #0A3161' : '1px solid #cbd5e1',
                   background: selectedSubCrime?.id === sub.id ? '#e8f0fe' : '#ffffff',
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  textAlign: 'left'
                 }}>
-                <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a', marginBottom: '4px' }}>
+                <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a', marginBottom: '4px', textAlign: 'left' }}>
                   {sub.name}
                 </div>
                 <span style={{ fontSize: '0.75rem', background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
@@ -153,19 +148,21 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       )}
 
-      {/* STEP 2: Incident Details Form */}
+      {/* STEP 2: Incident Details Form - Completely Left Aligned */}
       {currentStep === 2 && (
-        <div className="ux4g-card">
-          <h2 style={{ margin: '0 0 6px 0', color: '#0A3161', fontSize: '1.3rem' }}>
+        <div className="ux4g-card" style={{ textAlign: 'left' }}>
+          <h2 style={{ margin: '0 0 6px 0', color: '#0A3161', fontSize: '1.4rem', textAlign: 'left', fontWeight: 700 }}>
             Incident Information ({selectedSubCrime?.name})
           </h2>
-          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>
+          <p style={{ color: '#64748b', fontSize: '0.92rem', marginBottom: '24px', textAlign: 'left', lineHeight: 1.5 }}>
             Provide relevant dates, transaction numbers, and suspect details to help law enforcement investigate.
           </p>
 
-          <form onSubmit={(e) => { e.preventDefault(); setCurrentStep(3); }}>
-            <div className="ux4g-form-group">
-              <label className="ux4g-label">Date & Time of Incident <span className="required">*</span></label>
+          <form onSubmit={(e) => { e.preventDefault(); setCurrentStep(3); }} style={{ textAlign: 'left' }}>
+            <div className="ux4g-form-group" style={{ textAlign: 'left' }}>
+              <label className="ux4g-label" style={{ textAlign: 'left' }}>
+                Date & Time of Incident <span className="required">*</span>
+              </label>
               <input
                 type="datetime-local"
                 className="ux4g-input"
@@ -177,8 +174,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
             {category.id === 'financial' && (
               <>
-                <div className="ux4g-form-group">
-                  <label className="ux4g-label">Financial Loss Amount (INR ₹) <span className="required">*</span></label>
+                <div className="ux4g-form-group" style={{ textAlign: 'left' }}>
+                  <label className="ux4g-label" style={{ textAlign: 'left' }}>
+                    Financial Loss Amount (INR ₹) <span className="required">*</span>
+                  </label>
                   <input
                     type="number"
                     className="ux4g-input"
@@ -189,8 +188,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   />
                 </div>
 
-                <div className="ux4g-form-group">
-                  <label className="ux4g-label">Bank Transaction Reference / UTR Number</label>
+                <div className="ux4g-form-group" style={{ textAlign: 'left' }}>
+                  <label className="ux4g-label" style={{ textAlign: 'left' }}>
+                    Bank Transaction Reference / UTR Number
+                  </label>
                   <input
                     type="text"
                     className="ux4g-input"
@@ -202,8 +203,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               </>
             )}
 
-            <div className="ux4g-form-group">
-              <label className="ux4g-label">Suspect Details (Phone number, UPI ID, Social media profile, Website link)</label>
+            <div className="ux4g-form-group" style={{ textAlign: 'left' }}>
+              <label className="ux4g-label" style={{ textAlign: 'left' }}>
+                Suspect Details (Phone number, UPI ID, Social media profile, Website link)
+              </label>
               <input
                 type="text"
                 className="ux4g-input"
@@ -213,8 +216,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               />
             </div>
 
-            <div className="ux4g-form-group">
-              <label className="ux4g-label">Brief Description of the Incident <span className="required">*</span></label>
+            <div className="ux4g-form-group" style={{ textAlign: 'left' }}>
+              <label className="ux4g-label" style={{ textAlign: 'left' }}>
+                Brief Description of the Incident <span className="required">*</span>
+              </label>
               <textarea
                 className="ux4g-input"
                 rows={4}
@@ -225,7 +230,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
               <button type="button" className="ux4g-btn ux4g-btn-secondary" onClick={() => setCurrentStep(1)}>
                 ← Back
               </button>
@@ -237,20 +242,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       )}
 
-      {/* STEP 3: Evidence Upload */}
+      {/* STEP 3: Evidence Upload - Left Aligned */}
       {currentStep === 3 && (
-        <div className="ux4g-card">
-          <h2 style={{ margin: '0 0 6px 0', color: '#0A3161', fontSize: '1.3rem' }}>
+        <div className="ux4g-card" style={{ textAlign: 'left' }}>
+          <h2 style={{ margin: '0 0 6px 0', color: '#0A3161', fontSize: '1.4rem', textAlign: 'left', fontWeight: 700 }}>
             Upload Supporting Evidence
           </h2>
-          <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>
+          <p style={{ color: '#64748b', fontSize: '0.92rem', marginBottom: '20px', textAlign: 'left' }}>
             Attach payment receipts, SMS screenshots, chat transcripts, or email headers (JPG, PNG, PDF max 10MB each).
           </p>
 
-          <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '30px', textAlign: 'center', background: '#f8fafc', marginBottom: '20px' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '10px' }}>📁</div>
-            <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '4px' }}>Drag & Drop files here or browse</div>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '14px' }}>Supported formats: PDF, JPG, PNG</div>
+          <div style={{ border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '30px', textAlign: 'left', background: '#f8fafc', marginBottom: '20px' }}>
+            <div style={{ fontSize: '2.2rem', marginBottom: '8px' }}>📁</div>
+            <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '4px', textAlign: 'left' }}>Drag & Drop files here or browse</div>
+            <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '14px', textAlign: 'left' }}>Supported formats: PDF, JPG, PNG</div>
             <label className="ux4g-btn ux4g-btn-secondary" style={{ cursor: 'pointer' }}>
               Select Files
               <input type="file" multiple accept="image/*,.pdf" onChange={handleFileUpload} style={{ display: 'none' }} />
@@ -258,8 +263,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           </div>
 
           {uploadedFiles.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px' }}>Attached Files ({uploadedFiles.length}):</div>
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px', textAlign: 'left' }}>Attached Files ({uploadedFiles.length}):</div>
               {uploadedFiles.map((file, idx) => (
                 <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', background: '#e2e8f0', padding: '8px 12px', borderRadius: '6px', marginBottom: '6px', fontSize: '0.88rem' }}>
                   <span>📎 {file.name}</span>
@@ -287,19 +292,19 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
       {/* STEP 4: Complaint Acknowledgment Receipt */}
       {currentStep === 4 && (
-        <div className="ux4g-card" style={{ textAlign: 'center', padding: '36px 24px' }}>
-          <div style={{ width: '64px', height: '64px', background: '#e6f4ea', borderRadius: '50%', color: '#188038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', margin: '0 auto 16px auto' }}>
+        <div className="ux4g-card" style={{ textAlign: 'left', padding: '32px 24px' }}>
+          <div style={{ width: '56px', height: '56px', background: '#e6f4ea', borderRadius: '50%', color: '#188038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', marginBottom: '16px' }}>
             ✓
           </div>
 
-          <h2 style={{ color: '#0A3161', margin: '0 0 8px 0' }}>Complaint Successfully Registered!</h2>
-          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px' }}>
+          <h2 style={{ color: '#0A3161', margin: '0 0 8px 0', textAlign: 'left' }}>Complaint Successfully Registered!</h2>
+          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', textAlign: 'left' }}>
             Your incident report has been securely transmitted to the relevant Cyber Crime Police Cell for investigation.
           </p>
 
-          <div style={{ background: '#f8fafc', border: '1px border #e2e8f0', padding: '20px', borderRadius: '12px', marginBottom: '28px', display: 'inline-block', width: '100%', boxSizing: 'border-box' }}>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Acknowledgment Reference Number</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0A3161', margin: '6px 0', letterSpacing: '1px' }}>
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '12px', marginBottom: '28px', textAlign: 'left' }}>
+            <div style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'left' }}>Acknowledgment Reference Number</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0A3161', margin: '6px 0', letterSpacing: '1px', textAlign: 'left' }}>
               {ackNumber}
             </div>
             <div style={{ fontSize: '0.85rem', color: '#166534', background: '#dcfce7', padding: '4px 12px', borderRadius: '12px', display: 'inline-block' }}>
@@ -307,7 +312,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button type="button" className="ux4g-btn ux4g-btn-secondary" onClick={() => window.print()}>
               🖨️ Print Receipt
             </button>
