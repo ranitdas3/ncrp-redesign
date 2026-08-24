@@ -20,7 +20,7 @@ export const CRIME_CATEGORIES = [
     id: 'financial',
     title: 'Financial',
     titleHi: 'वित्तीय धोखाधड़ी',
-    icon: '💰',
+    icon: '💵',
     color: '#0A3161',
     summary: 'UPI Fraud, Bank Fraud, Card Fraud, Investment Scam, Loan app Fraud, Phishing, Crypto fraud, Digital Arrest Scam...',
     description: 'Crimes related to unauthorized banking, credit/debit card theft, investment scams, and money transfer fraud.',
