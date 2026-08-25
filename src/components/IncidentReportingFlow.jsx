@@ -19,6 +19,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   // Evidence files list attached to the case
   const [attachedFiles, setAttachedFiles] = useState([]);
 
+  // Mandatory Terms & Declaration Checkbox State
+  const [isDeclarationAccepted, setIsDeclarationAccepted] = useState(false);
+
   // Dynamic Category-Specific Incident Details Fields
   const [incidentFields, setIncidentFields] = useState({
     incidentDate: new Date().toISOString().slice(0, 16),
@@ -455,7 +458,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       </div>
 
-      {/* Main Grid Wrapper (Persistent Side Card for ALL categories in Steps 1 & 2) */}
+      {/* Main Grid Wrapper */}
       <div style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
         
         {/* Left Form Area */}
@@ -923,6 +926,60 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </>
                 )}
 
+                {/* Terms & Declaration Checkbox Box (Mandatory before registration) */}
+                {(!hasMultipleDetailsPages || detailsPage === 2) && (
+                  <div style={{
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    marginBottom: '20px'
+                  }}>
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      margin: 0
+                    }}>
+                      <input
+                        type="checkbox"
+                        required
+                        checked={isDeclarationAccepted}
+                        onChange={(e) => setIsDeclarationAccepted(e.target.checked)}
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          marginTop: '2px',
+                          accentColor: '#0b2e59',
+                          cursor: 'pointer',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span style={{ fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.45 }}>
+                        I declare that the information provided is correct to the best of my knowledge under Indian Laws. I have read the{' '}
+                        <a
+                          href="https://cybercrime.gov.in/Webform/FAQ.aspx"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
+                          onClick={(e) => e.stopPropagation()}>
+                          FAQ
+                        </a>{' '}
+                        and agree to the portal's{' '}
+                        <a
+                          href="https://cybercrime.gov.in/Webform/privacy_policy.aspx"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
+                          onClick={(e) => e.stopPropagation()}>
+                          Privacy Policy
+                        </a>.
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 {/* Clean Action Buttons */}
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button
@@ -942,7 +999,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     type="submit"
                     className="ux4g-btn ux4g-btn-primary"
                     style={{ flex: 1 }}
-                    disabled={isSubmitting}>
+                    disabled={isSubmitting || ((!hasMultipleDetailsPages || detailsPage === 2) && !isDeclarationAccepted)}>
                     {hasMultipleDetailsPages && detailsPage === 1
                       ? 'Continue to Additional Details →'
                       : isSubmitting
@@ -956,7 +1013,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           )}
 
-          {/* STEP 3: REGISTERED CONFIRMATION SCREEN (DYNAMIC FOR ALL CATEGORIES) */}
+          {/* STEP 3: REGISTERED CONFIRMATION SCREEN */}
           {currentStep === 3 && (
             <div>
               
