@@ -281,6 +281,10 @@ body {
   background-color: #f8fafc;
 }
 
+.ux4g-option-hover:hover {
+  background-color: #f1f5f9;
+}
+
 .ux4g-pill-chip.selected {
   background-color: #E5F0FF;
   color: #0b2e59;

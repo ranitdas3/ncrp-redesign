@@ -2,32 +2,37 @@ import React, { useState } from 'react';
 
 export default function IncidentReportingFlow({ category, currentLang, onBackToCategories }) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [detailsPage, setDetailsPage] = useState(1);
   const isWomenChildren = category?.id === 'women-children';
 
-  // Sub-Crime Selection State (No pill pre-selected by default)
+  // Sub-Crime Selection State
   const [selectedSubCrime, setSelectedSubCrime] = useState(null);
 
-  // Intake State (Principle 1: Capture Fast, Structure Later)
+  // Intake State
   const [description, setDescription] = useState('');
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [voiceTimer, setVoiceTimer] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Dynamic Category-Specific Incident Details
-  const [incidentFields, setIncidentFields] = useState({
-    // Smart Defaults & Background Enrichment
-    incidentDate: new Date().toISOString().slice(0, 16),
-    locationContext: 'New Delhi, India (Captured via Network IP)',
-    deviceMeta: 'macOS / Chrome Browser (Auto-Verified)',
-    complainantPhone: '+91 98765 43210 (Linked Citizen ID)',
+  // Evidence Options Menu Modal / Popover State
+  const [showEvidenceMenu, setShowEvidenceMenu] = useState(false);
 
-    // Extracted / Category-Specific Fields
-    financialLoss: '',
-    transactionRef: '',
-    victimBank: 'State Bank of India',
+  // Evidence files list attached to the case
+  const [attachedFiles, setAttachedFiles] = useState([]);
+
+  // Dynamic Category-Specific Incident Details Fields
+  const [incidentFields, setIncidentFields] = useState({
+    incidentDate: new Date().toISOString().slice(0, 16),
     suspectDetails: '',
     platform: '',
     contentType: '',
+    incidentLocation: 'New Delhi, India (Captured via Network IP)',
+    suspectIpEmail: '',
+    witnessContact: '',
+
+    financialLoss: '32500',
+    transactionRef: '429184029102',
+    victimBank: 'State Bank of India',
     targetSystem: '',
   });
 
@@ -35,6 +40,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const [ackNumber, setAckNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [followUpSent, setFollowUpSent] = useState(false);
+
+  // Total fields count logic
+  const totalCategoryFields = isWomenChildren ? 7 : category?.id === 'financial' ? 6 : 4;
+  const hasMultipleDetailsPages = totalCategoryFields > 5;
 
   // Feature: Speak Complaint (Voice Input Simulation)
   const handleToggleVoice = () => {
@@ -49,8 +58,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             clearInterval(timer);
             setIsRecordingVoice(false);
             const voiceText = 'Incident occurred yesterday around 8 PM on Instagram. Received threatening harassment messages from profile @cyber_harasser_99.';
-            setDescription(voiceText);
+            setDescription((p) => (p ? `${p}\n${voiceText}` : voiceText));
             autoExtractFromText(voiceText);
+            setAttachedFiles((prevFiles) => [
+              ...prevFiles,
+              'voice_statement_' + Math.floor(1000 + Math.random() * 9000) + '.aac'
+            ]);
             return 0;
           }
           return prev + 1;
@@ -59,17 +72,36 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }
   };
 
-  // Feature: Scan Screenshot / Receipt (OCR Scanning Simulation)
-  const handleFileUpload = (e) => {
+  // Feature: Add Evidence File
+  const handleFileUpload = (e, optionType = 'Evidence') => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
+      const files = Array.from(e.target.files);
+      const firstFile = files[0];
       setIsAnalyzing(true);
+      setShowEvidenceMenu(false);
       setTimeout(() => {
         setIsAnalyzing(false);
-        const scannedText = `[Scanned from ${file.name}]: Suspect handle @cyber_harasser_99 on Telegram. Loss amount Rs 25,000 via UTR 429184029102.`;
-        setDescription(scannedText);
+        const scannedText = `[Scanned ${optionType} from ${firstFile.name}]: Suspect handle @cyber_harasser_99 on Telegram. Loss amount Rs 25,000 via UTR 429184029102.`;
+        setDescription((prev) => (prev ? `${prev}\n${scannedText}` : scannedText));
         autoExtractFromText(scannedText);
-      }, 1200);
+        
+        const fileNames = files.map((f) => f.name);
+        setAttachedFiles((prevFiles) => [...prevFiles, ...fileNames]);
+      }, 1000);
+    }
+  };
+
+  // Feature: Delete Evidence Item from Summary Card
+  const handleDeleteEvidence = (indexToDelete) => {
+    setAttachedFiles((prev) => prev.filter((_, idx) => idx !== indexToDelete));
+  };
+
+  // Feature: Quick Add Evidence from Summary Card
+  const handleQuickAddEvidenceFromCard = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      const fileNames = files.map((f) => f.name);
+      setAttachedFiles((prevFiles) => [...prevFiles, ...fileNames]);
     }
   };
 
@@ -77,7 +109,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const autoExtractFromText = (text) => {
     const textLower = text.toLowerCase();
     
-    // Extract Financial Loss (e.g. Rs 25,000 or 25000)
+    // Extract Financial Loss
     const amountMatch = text.match(/(?:rs\.?|inr|₹|\$)\s*([\d,]+)/i) || text.match(/(\d{4,6})\s*(?:debited|lost|transferred|rupees)/i);
     const extractedLoss = amountMatch ? amountMatch[1].replace(/,/g, '') : incidentFields.financialLoss;
 
@@ -99,7 +131,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     if (textLower.includes('instagram')) extractedPlatform = 'Instagram';
     else if (textLower.includes('whatsapp')) extractedPlatform = 'WhatsApp';
     else if (textLower.includes('telegram')) extractedPlatform = 'Telegram';
-    else if (textLower.includes('phonepe') || textLower.includes('gpay') || textLower.includes('upi')) extractedPlatform = 'UPI App';
 
     setIncidentFields((prev) => ({
       ...prev,
@@ -110,7 +141,24 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }));
   };
 
-  // Proceed to Step 2 or Direct Submission
+  // Evidence Strength Score Calculation
+  const calculateEvidenceScore = () => {
+    let score = 0;
+    if (selectedSubCrime) score += 1;
+    if (description.trim().length > 15 || incidentFields.suspectDetails) score += 1;
+    if (attachedFiles.length > 0 || isRecordingVoice) score += 1;
+    return score;
+  };
+
+  const evidenceScore = calculateEvidenceScore();
+  const evidenceLevel = evidenceScore <= 1 ? 'WEAK' : evidenceScore === 2 ? 'OKAY' : 'STRONG';
+  const evidenceBadge = evidenceScore <= 1
+    ? { bg: '#fef2f2', color: '#ef4444', border: '#fca5a5' }
+    : evidenceScore === 2
+    ? { bg: '#fffbeb', color: '#d97706', border: '#fcd34d' }
+    : { bg: '#f0fdf4', color: '#16a34a', border: '#86efac' };
+
+  // Proceed Handler
   const handleAnalyzeAndProceed = (directSubmit = false) => {
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -121,6 +169,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         finalizeComplaint();
       } else {
         setCurrentStep(2);
+        setDetailsPage(1);
       }
     }, 500);
   };
@@ -136,8 +185,196 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }, 1000);
   };
 
+  const containerMaxWidth = isWomenChildren && currentStep !== 3 ? '1180px' : '820px';
+
+  // Category-specific Fast Intake Button Label
+  const getActionBtnLabel = () => {
+    if (isWomenChildren) return '📸 Add Evidence';
+    if (category?.id === 'financial') return '📸 Scan Receipt / Screenshot';
+    if (category?.id === 'identity') return '📸 Upload Profile / Chat Screenshot';
+    return '📸 Scan Screenshot / Receipt';
+  };
+
+  // Case Summary Component (Persists across Steps 1 and 2 for Women & Children, NOT in Step 3)
+  const renderCaseSummaryCard = () => (
+    <div style={{
+      background: '#ffffff',
+      border: '1px solid #cbd5e1',
+      borderRadius: '16px',
+      boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'sticky',
+      top: '20px'
+    }}>
+      {/* Case Summary Top Header */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#fafafa' }}>
+        <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+          CASE SUMMARY
+        </h3>
+      </div>
+
+      {/* Case ID & Evidence Strength */}
+      <div style={{ padding: '18px 20px', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.5px', marginBottom: '14px' }}>
+          {ackNumber ? ackNumber : 'NCRP-2026 - XXXXX'}
+        </div>
+
+        {/* Evidence Strength Meter */}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.5px' }}>
+              EVIDENCE STRENGTH
+            </span>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              border: `1px solid ${evidenceBadge.border}`,
+              color: evidenceBadge.color,
+              background: evidenceBadge.bg,
+              letterSpacing: '0.5px'
+            }}>
+              {evidenceLevel}
+            </span>
+          </div>
+
+          {/* Multi-Segment Color Bar */}
+          <div style={{ display: 'flex', gap: '4px', height: '8px', borderRadius: '4px', overflow: 'hidden', background: '#e2e8f0' }}>
+            <div style={{ flex: 1, background: '#ef4444', opacity: evidenceScore >= 1 ? 1 : 0.25, transition: 'all 0.3s' }} />
+            <div style={{ flex: 1, background: '#f59e0b', opacity: evidenceScore >= 2 ? 1 : 0.25, transition: 'all 0.3s' }} />
+            <div style={{ flex: 1, background: '#22c55e', opacity: evidenceScore >= 3 ? 1 : 0.25, transition: 'all 0.3s' }} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>
+            <span>WEAK</span>
+            <span>OKAY</span>
+            <span>STRONG</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Category & Sub-Category Rows */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+          <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>CATEGORY</span>
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>Women & Children</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+          <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>SUB-CATEGORY</span>
+          <span style={{ fontWeight: 600, color: selectedSubCrime ? '#0f172a' : '#94a3b8' }}>
+            {selectedSubCrime ? selectedSubCrime.name : 'Not selected yet'}
+          </span>
+        </div>
+
+        {incidentFields.platform && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>PLATFORM</span>
+            <span style={{ fontWeight: 600, color: '#0f172a' }}>{incidentFields.platform}</span>
+          </div>
+        )}
+
+        {incidentFields.suspectDetails && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>SUSPECT</span>
+            <span style={{ fontWeight: 600, color: '#0f172a' }}>{incidentFields.suspectDetails}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Evidence Section with Delete and Direct Add Buttons */}
+      <div style={{ padding: '16px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.4px' }}>
+            EVIDENCE
+          </span>
+          <label style={{
+            fontSize: '0.74rem',
+            color: '#0b2e59',
+            fontWeight: 700,
+            cursor: 'pointer',
+            background: '#e5f0ff',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            + Add Evidence
+            <input type="file" multiple accept="image/*,.pdf,.aac,.mp3,.mp4" onChange={handleQuickAddEvidenceFromCard} style={{ display: 'none' }} />
+          </label>
+        </div>
+
+        {attachedFiles.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {attachedFiles.map((filename, idx) => (
+              <div key={idx} style={{
+                background: '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '7px 10px',
+                fontSize: '0.8rem',
+                fontFamily: 'monospace',
+                color: '#1e293b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px'
+              }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  📄 {filename}
+                </span>
+                <button
+                  type="button"
+                  title="Delete evidence"
+                  onClick={() => handleDeleteEvidence(idx)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#ef4444',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    padding: '0 4px',
+                    lineHeight: 1
+                  }}>
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '4px 0' }}>
+            No evidence added yet
+          </div>
+        )}
+      </div>
+
+    </div>
+  );
+
+  // Steps header labels
+  const stepsList = hasMultipleDetailsPages
+    ? [
+        { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
+        { num: 2, title: 'Incident Details', detail: 'Primary Info' },
+        { num: 3, title: 'Additional Details', detail: 'Secondary Info' },
+        { num: 4, title: 'Registration', detail: 'Acknowledgment number' }
+      ]
+    : [
+        { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
+        { num: 2, title: 'Incident Details', detail: 'Category-Specific Fields' },
+        { num: 3, title: 'Registration', detail: 'Acknowledgment number' }
+      ];
+
+  const activeStepNum = currentStep === 1 ? 1 : currentStep === 3 ? (hasMultipleDetailsPages ? 4 : 3) : (detailsPage === 1 ? 2 : 3);
+  const progressPercent = (activeStepNum / stepsList.length) * 100;
+
   return (
-    <div style={{ maxWidth: '820px', margin: '24px auto', padding: '0 20px', textAlign: 'left' }}>
+    <div style={{ maxWidth: containerMaxWidth, margin: '24px auto', padding: '0 20px', textAlign: 'left', transition: 'max-width 0.3s ease' }}>
       
       {/* Back Navigation Button */}
       <div style={{ marginBottom: '16px' }}>
@@ -163,17 +400,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       {/* Progressive Disclosure Header (Visible Progress Bar) */}
       <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-          {[
-            { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
-            { num: 2, title: 'Incident Details', detail: 'Category-Specific Fields' },
-            { num: 3, title: 'Registered & Saved', detail: 'Instant Receipt' }
-          ].map((s) => (
-            <div key={s.num} style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: currentStep >= s.num ? 1 : 0.4 }}>
+          {stepsList.map((s) => (
+            <div key={s.num} style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: activeStepNum >= s.num ? 1 : 0.4 }}>
               <div style={{
                 width: '26px',
                 height: '26px',
                 borderRadius: '50%',
-                background: currentStep >= s.num ? '#0b2e59' : '#cbd5e1',
+                background: activeStepNum >= s.num ? '#0b2e59' : '#cbd5e1',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
@@ -181,10 +414,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 fontSize: '0.85rem',
                 fontWeight: 'bold'
               }}>
-                {currentStep > s.num ? '✓' : s.num}
+                {activeStepNum > s.num ? '✓' : s.num}
               </div>
               <div>
-                <div style={{ fontSize: '0.88rem', fontWeight: currentStep === s.num ? '700' : '600', color: '#0f172a' }}>{s.title}</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: activeStepNum === s.num ? '700' : '600', color: '#0f172a' }}>{s.title}</div>
                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{s.detail}</div>
               </div>
             </div>
@@ -194,551 +427,635 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           <div style={{
             background: '#0b2e59',
             height: '100%',
-            width: currentStep === 1 ? '33%' : currentStep === 2 ? '66%' : '100%',
+            width: `${progressPercent}%`,
             transition: 'width 0.3s ease-in-out'
           }} />
         </div>
       </div>
 
-      {/* ======================================================================= */}
-      {/* STEP 1: WIREFRAME LAYOUT FOR WOMEN & CHILDREN                           */}
-      {/* ======================================================================= */}
-      {currentStep === 1 && isWomenChildren && (
-        <div className="ux4g-wireframe-card">
-          
-          {/* Header with Emoji Icon Box + Category Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-            <div style={{
-              width: '44px',
-              height: '44px',
-              backgroundColor: '#6ba0c7',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.4rem',
-              color: '#ffffff',
-              flexShrink: 0
-            }}>
-              👩‍👧‍👦
-            </div>
-            <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.5px' }}>
-              {category.title}
-            </h2>
-          </div>
+      {/* Main Grid Wrapper (Persistent Side Card for Women & Children ONLY in Steps 1 & 2) */}
+      <div style={isWomenChildren && currentStep !== 3 ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
+        
+        {/* Left Form Area */}
+        <div>
 
-          {/* Sub-Category Selector Pills with Red Star */}
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
-              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> SELECT THE SPECIFIC TYPE OF INCIDENT THAT OCCURED
-            </label>
-            
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {category.subCrimes.map((sub) => {
-                const isSelected = selectedSubCrime?.id === sub.id;
-                return (
-                  <button
-                    key={sub.id}
-                    type="button"
-                    onClick={() => setSelectedSubCrime(sub)}
-                    className={`ux4g-pill-chip ${isSelected ? 'selected' : ''}`}>
-                    {sub.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Description Section with Red Star + Speak & Scan Buttons Above */}
-          <div style={{ marginTop: '32px', marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
-              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> GIVE DESCRIPTION OF THE INCIDENT
-            </label>
-
-            {/* Fast Input Action Buttons with Icons */}
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
+          {/* STEP 1 FOR WOMEN & CHILDREN */}
+          {currentStep === 1 && isWomenChildren && (
+            <div className="ux4g-wireframe-card">
               
-              {/* Speak Complaint Button */}
+              {/* Header with Emoji Icon Box + Category Title */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: '#6ba0c7',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.4rem',
+                  color: '#ffffff',
+                  flexShrink: 0
+                }}>
+                  👩‍👧‍👦
+                </div>
+                <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.5px' }}>
+                  {category.title}
+                </h2>
+              </div>
+
+              {/* Sub-Category Selector Pills with Red Star */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
+                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> SELECT THE SPECIFIC TYPE OF INCIDENT THAT OCCURED
+                </label>
+                
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  {category.subCrimes.map((sub) => {
+                    const isSelected = selectedSubCrime?.id === sub.id;
+                    return (
+                      <button
+                        key={sub.id}
+                        type="button"
+                        onClick={() => setSelectedSubCrime(sub)}
+                        className={`ux4g-pill-chip ${isSelected ? 'selected' : ''}`}>
+                        {sub.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Description Section with Red Star + Speak & Dynamic Add Evidence Buttons Above */}
+              <div style={{ marginTop: '32px', marginBottom: '16px', position: 'relative' }}>
+                <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
+                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> GIVE DESCRIPTION OF THE INCIDENT
+                </label>
+
+                {/* Fast Input Action Buttons */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', flexWrap: 'wrap', position: 'relative' }}>
+                  
+                  {/* Speak Complaint Button */}
+                  <button
+                    type="button"
+                    onClick={handleToggleVoice}
+                    style={{
+                      background: isRecordingVoice ? '#fee2e2' : '#ffffff',
+                      border: isRecordingVoice ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
+                      borderRadius: '16px',
+                      padding: '8px 20px',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      color: isRecordingVoice ? '#b91c1c' : '#1e293b',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    className={isRecordingVoice ? 'ux4g-voice-pulse' : ''}>
+                    🎙️ {isRecordingVoice ? `Recording... (${voiceTimer}s)` : 'Speak Complaint'}
+                  </button>
+
+                  {/* Dynamic Add Evidence Action Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowEvidenceMenu(!showEvidenceMenu)}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '16px',
+                      padding: '8px 20px',
+                      fontSize: '0.88rem',
+                      fontWeight: 600,
+                      color: '#1e293b',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                    {isAnalyzing ? 'Scanning Evidence...' : `${getActionBtnLabel()} ▾`}
+                  </button>
+
+                  {/* Multiple Evidence Options Dropdown Menu */}
+                  {showEvidenceMenu && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '46px',
+                      left: '180px',
+                      zIndex: 10,
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)',
+                      padding: '8px',
+                      minWidth: '240px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Select Evidence Type to Upload:
+                      </div>
+
+                      {[
+                        { label: '🖼️ Screenshot / Image File', type: 'Screenshot' },
+                        { label: '💬 Chat Log / Message Export', type: 'Chat Log' },
+                        { label: '🎙️ Audio / Voice Recording', type: 'Voice Audio' },
+                        { label: '📄 PDF Report / Document', type: 'PDF Document' },
+                        { label: '🧾 Payment Receipt / Invoice', type: 'Receipt' },
+                      ].map((opt, idx) => (
+                        <label key={idx} style={{
+                          padding: '8px 12px',
+                          fontSize: '0.86rem',
+                          fontWeight: 500,
+                          color: '#0f172a',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'background 0.2s'
+                        }}
+                        className="ux4g-option-hover">
+                          {opt.label}
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*,.pdf,.aac,.mp3,.mp4,.txt"
+                            onChange={(e) => handleFileUpload(e, opt.type)}
+                            style={{ display: 'none' }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Textarea Input Box */}
+                <textarea
+                  className="ux4g-input"
+                  rows={5}
+                  placeholder="Describe what Happened (e.g date/time step by step)"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  style={{
+                    borderRadius: '16px',
+                    padding: '14px 16px',
+                    fontSize: '0.95rem',
+                    borderColor: '#cbd5e1',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              {/* Primary Action Buttons matching wireframe layout */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <button
+                  type="button"
+                  className="ux4g-btn-dark-navy"
+                  disabled={isAnalyzing}
+                  onClick={() => handleAnalyzeAndProceed(false)}>
+                  {isAnalyzing ? 'Analyzing...' : 'Analyze & Review Details →'}
+                </button>
+
+                <button
+                  type="button"
+                  className="ux4g-btn-outline-navy"
+                  disabled={isAnalyzing}
+                  onClick={() => handleAnalyzeAndProceed(true)}>
+                  Direct 1-Click Register (Fastest)
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {/* STEP 1 FOR OTHER CATEGORIES */}
+          {currentStep === 1 && !isWomenChildren && (
+            <div className="ux4g-card" style={{ textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <span style={{ fontSize: '2rem' }}>{category.icon}</span>
+                <div>
+                  <h2 style={{ margin: 0, color: '#0A3161', fontSize: '1.4rem' }}>{category.title}</h2>
+                  <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Select the specific type of incident that occurred</p>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+                {category.subCrimes.map((sub) => (
+                  <div
+                    key={sub.id}
+                    onClick={() => setSelectedSubCrime(sub)}
+                    style={{
+                      padding: '14px',
+                      borderRadius: '10px',
+                      border: selectedSubCrime?.id === sub.id ? '2px solid #0A3161' : '1px solid #cbd5e1',
+                      background: selectedSubCrime?.id === sub.id ? '#e8f0fe' : '#ffffff',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a', marginBottom: '4px' }}>
+                      {sub.name}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                      {sub.tag}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="ux4g-form-group">
+                <label className="ux4g-label">Incident Description</label>
+                <textarea
+                  className="ux4g-input"
+                  rows={4}
+                  placeholder="Describe what happened..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+
               <button
                 type="button"
-                onClick={handleToggleVoice}
-                style={{
-                  background: isRecordingVoice ? '#fee2e2' : '#ffffff',
-                  border: isRecordingVoice ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                  borderRadius: '16px',
-                  padding: '8px 20px',
-                  fontSize: '0.88rem',
-                  fontWeight: 600,
-                  color: isRecordingVoice ? '#b91c1c' : '#1e293b',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-                className={isRecordingVoice ? 'ux4g-voice-pulse' : ''}>
-                🎙️ {isRecordingVoice ? `Recording... (${voiceTimer}s)` : 'Speak Complaint'}
+                className="ux4g-btn ux4g-btn-primary ux4g-btn-block"
+                onClick={() => handleAnalyzeAndProceed(false)}>
+                Proceed to Incident Details →
               </button>
+            </div>
+          )}
 
-              {/* Scan Screenshot / Receipt Button */}
-              <label style={{
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '16px',
-                padding: '8px 20px',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                color: '#1e293b',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px'
+          {/* STEP 2: CATEGORY-SPECIFIC INCIDENT DETAILS */}
+          {currentStep === 2 && (
+            <div className="ux4g-card">
+              
+              {/* Header Title */}
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '1.35rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.4px' }}>
+                  {detailsPage === 1 ? 'Incident Details' : 'Additional Incident Details'}
+                </h2>
+                <div style={{ fontSize: '0.86rem', color: '#64748b' }}>
+                  Confirm or complete the details below before official case registration.
+                </div>
+              </div>
+
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (hasMultipleDetailsPages && detailsPage === 1) {
+                  setDetailsPage(2);
+                } else {
+                  finalizeComplaint();
+                }
               }}>
-                📸 {isAnalyzing ? 'Scanning Screenshot...' : 'Scan Screenshot/Receipt'}
-                <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} style={{ display: 'none' }} />
-              </label>
+                
+                {/* PAGE 1: PRIMARY FIELDS */}
+                {detailsPage === 1 && (
+                  <>
+                    {/* Field 1: Incident Date & Time */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Date & Time
+                        </label>
+                        <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                      </div>
+                      <input
+                        type="datetime-local"
+                        className="ux4g-input"
+                        required
+                        value={incidentFields.incidentDate}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, incidentDate: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Field 2: Suspect Handle / Phone / Profile */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Suspect Handle / Phone / Profile
+                        </label>
+                        {incidentFields.suspectDetails && (
+                          <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        required
+                        placeholder="e.g. @cyber_harasser_99 or +91 98765xxxx"
+                        value={incidentFields.suspectDetails}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Field 3: Social Media / Platform */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Social Media / Platform
+                        </label>
+                        {incidentFields.platform && (
+                          <span className="ux4g-confidence-badge">✓ Auto-Detected</span>
+                        )}
+                      </div>
+                      <select
+                        className="ux4g-input"
+                        required
+                        value={incidentFields.platform || 'Instagram'}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value })}>
+                        <option value="Instagram">Instagram</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Telegram">Telegram</option>
+                        <option value="X (Twitter)">X (Twitter)</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Snapchat">Snapchat</option>
+                        <option value="Other Website">Other Website</option>
+                      </select>
+                    </div>
+
+                    {/* Field 4: Incident Content Type */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          Incident Content Type
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        placeholder="e.g. Harassing messages, non-consensual photo, threat call"
+                        value={incidentFields.contentType}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, contentType: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Field 5: Incident Location Context */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Location / Network City
+                        </label>
+                        <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        required
+                        value={incidentFields.incidentLocation}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, incidentLocation: e.target.value })}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* PAGE 2: SECONDARY FIELDS */}
+                {detailsPage === 2 && (
+                  <>
+                    {/* Field 6: Suspect IP / Secondary Contact */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          Secondary Suspect IP / Contact Email
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        placeholder="e.g. Suspect IP 192.168.x.x or suspect email address"
+                        value={incidentFields.suspectIpEmail}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, suspectIpEmail: e.target.value })}
+                      />
+                    </div>
+
+                    {/* Field 7: Witness Reference Contact */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          Witness Contact / Secondary Reference
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        placeholder="e.g. Secondary contact or witness mobile number"
+                        value={incidentFields.witnessContact}
+                        onChange={(e) => setIncidentFields({ ...incidentFields, witnessContact: e.target.value })}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Clean Action Buttons */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    type="button"
+                    className="ux4g-btn ux4g-btn-secondary"
+                    onClick={() => {
+                      if (detailsPage === 2) {
+                        setDetailsPage(1);
+                      } else {
+                        setCurrentStep(1);
+                      }
+                    }}>
+                    ← Back
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="ux4g-btn ux4g-btn-primary"
+                    style={{ flex: 1 }}
+                    disabled={isSubmitting}>
+                    {hasMultipleDetailsPages && detailsPage === 1
+                      ? 'Continue to Additional Details →'
+                      : isSubmitting
+                      ? 'Registering Complaint...'
+                      : 'Register Official Cyber Crime Complaint →'}
+                  </button>
+                </div>
+
+              </form>
 
             </div>
+          )}
 
-            {/* Textarea Input Box */}
-            <textarea
-              className="ux4g-input"
-              rows={5}
-              placeholder="Describe what Happened (e.g date/time step by step)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              style={{
-                borderRadius: '16px',
-                padding: '14px 16px',
-                fontSize: '0.95rem',
-                borderColor: '#cbd5e1',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          {/* Primary Action Buttons matching wireframe layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <button
-              type="button"
-              className="ux4g-btn-dark-navy"
-              disabled={isAnalyzing}
-              onClick={() => handleAnalyzeAndProceed(false)}>
-              {isAnalyzing ? 'Analyzing...' : 'Analyze & Review Details →'}
-            </button>
-
-            <button
-              type="button"
-              className="ux4g-btn-outline-navy"
-              disabled={isAnalyzing}
-              onClick={() => handleAnalyzeAndProceed(true)}>
-              Direct 1-Click Register (Fastest)
-            </button>
-          </div>
-
-        </div>
-      )}
-
-      {/* ======================================================================= */}
-      {/* STEP 1 FOR OTHER CATEGORIES (Standard Category Flow)                    */}
-      {/* ======================================================================= */}
-      {currentStep === 1 && !isWomenChildren && (
-        <div className="ux4g-card" style={{ textAlign: 'left' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <span style={{ fontSize: '2rem' }}>{category.icon}</span>
+          {/* STEP 3: REGISTERED CONFIRMATION SCREEN MATCHING WIREFRAME EXACTLY */}
+          {currentStep === 3 && (
             <div>
-              <h2 style={{ margin: 0, color: '#0A3161', fontSize: '1.4rem' }}>{category.title}</h2>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Select the specific type of incident that occurred</p>
-            </div>
-          </div>
+              
+              {/* Main Official Registration Box */}
+              <div className="ux4g-card" style={{ textAlign: 'left', padding: '32px 36px' }}>
+                
+                {/* Header Success Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    background: '#e6f4ea',
+                    color: '#16a34a',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.5rem',
+                    fontWeight: 800,
+                    flexShrink: 0
+                  }}>
+                    ✓
+                  </div>
+                  <div>
+                    <h2 style={{ margin: 0, color: '#0b2e59', fontSize: '1.45rem', fontWeight: 800 }}>
+                      Complaint Successfully Registered!
+                    </h2>
+                    <div style={{ color: '#64748b', fontSize: '0.92rem', marginTop: '2px' }}>
+                      Your case is saved in the National Cyber Crime Reporting System.
+                    </div>
+                  </div>
+                </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-            {category.subCrimes.map((sub) => (
-              <div
-                key={sub.id}
-                onClick={() => setSelectedSubCrime(sub)}
-                style={{
-                  padding: '14px',
-                  borderRadius: '10px',
-                  border: selectedSubCrime?.id === sub.id ? '2px solid #0A3161' : '1px solid #cbd5e1',
-                  background: selectedSubCrime?.id === sub.id ? '#e8f0fe' : '#ffffff',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
+                {/* Official Acknowledgment Number Card */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '20px 24px',
+                  marginBottom: '20px'
                 }}>
-                <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a', marginBottom: '4px' }}>
-                  {sub.name}
+                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
+                    OFFICIAL ACKNOWLEDGMENT NUMBER
+                  </div>
+
+                  <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#0b2e59', letterSpacing: '1px', margin: '6px 0 14px 0' }}>
+                    {ackNumber || 'NCRP-2026-625957'}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ background: '#dcfce7', color: '#166534', fontWeight: 600, fontSize: '0.84rem', padding: '5px 14px', borderRadius: '14px' }}>
+                      Status: Assigned to State Cyber Cell
+                    </span>
+                    <span style={{ background: '#e2e8f0', color: '#334155', fontWeight: 600, fontSize: '0.84rem', padding: '5px 14px', borderRadius: '14px' }}>
+                      Category: {category?.title} {selectedSubCrime ? `(${selectedSubCrime.name})` : ''}
+                    </span>
+                  </div>
                 </div>
-                <span style={{ fontSize: '0.75rem', background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                  {sub.tag}
-                </span>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="ux4g-btn-outline-navy"
+                    style={{ padding: '10px 20px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                    onClick={() => window.print()}>
+                    🖨️ Print Official Receipt
+                  </button>
+
+                  <button
+                    type="button"
+                    className="ux4g-btn-dark-navy"
+                    style={{ padding: '10px 24px', borderRadius: '8px' }}
+                    onClick={onBackToCategories}>
+                    Return to Dashboard
+                  </button>
+                </div>
+
               </div>
-            ))}
-          </div>
 
-          <div className="ux4g-form-group">
-            <label className="ux4g-label">Incident Description</label>
-            <textarea
-              className="ux4g-input"
-              rows={4}
-              placeholder="Describe what happened..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
+              {/* Dashed Box Below: Add Evidence Documents (Optional Follow-Up) */}
+              <div style={{
+                border: '1.5px dashed #94a3b8',
+                borderRadius: '16px',
+                padding: '24px 28px',
+                background: '#ffffff',
+                marginTop: '24px',
+                textAlign: 'left'
+              }}>
+                {/* Header Row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    📎 Add Evidence Documents (Optional Follow-Up)
+                  </div>
 
-          <button
-            type="button"
-            className="ux4g-btn ux4g-btn-primary ux4g-btn-block"
-            onClick={() => handleAnalyzeAndProceed(false)}>
-            Proceed to Incident Details →
-          </button>
-        </div>
-      )}
+                  <span style={{ background: '#e0f2fe', color: '#0369a1', fontWeight: 600, fontSize: '0.8rem', padding: '4px 12px', borderRadius: '12px' }}>
+                    Does not block registered case
+                  </span>
+                </div>
 
-      {/* ======================================================================= */}
-      {/* STEP 2: CATEGORY-SPECIFIC INCIDENT DETAILS                              */}
-      {/* ======================================================================= */}
-      {currentStep === 2 && (
-        <div className="ux4g-card">
-          
-          {/* Header Title */}
-          <div style={{ marginBottom: '20px' }}>
-            <h2 style={{ margin: '0 0 4px 0', fontSize: '1.35rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.4px' }}>
-              Incident Details ({category?.title})
-            </h2>
-            <div style={{ fontSize: '0.86rem', color: '#64748b' }}>
-              Confirm or complete the details below before official case registration.
-            </div>
-          </div>
+                <div style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.4, marginBottom: '18px' }}>
+                  Upload screenshots, payment receipts, bank statement PDFs, or chat history now or send a link to upload later when you have time.
+                </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); finalizeComplaint(); }}>
-            
-            {/* Common Mandatory Field: Incident Date & Time */}
-            <div className="ux4g-form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Date & Time
-                </label>
-                <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                {/* Drag & Drop Dropzone Box */}
+                <div style={{
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  textAlign: 'center',
+                  background: '#fafafa'
+                }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📁</div>
+                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem', marginBottom: '4px' }}>
+                    Drag & drop evidence files here
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '14px' }}>
+                    Supports JPG, PNG, PDF (Max 10MB each)
+                  </div>
+
+                  <label style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #0b2e59',
+                    color: '#0b2e59',
+                    fontWeight: 600,
+                    fontSize: '0.88rem',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'inline-block'
+                  }}>
+                    Browse Files
+                    <input type="file" multiple accept="image/*,.pdf,.aac,.mp3,.mp4" onChange={handleQuickAddEvidenceFromCard} style={{ display: 'none' }} />
+                  </label>
+                </div>
+
+                {/* Uploading from Mobile or Desktop Later Link Box */}
+                <div style={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '14px 18px',
+                  display: 'flex',
+                  justify: 'space-between',
+                  alignItems: 'center',
+                  marginTop: '16px',
+                  background: '#ffffff',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
+                      📱 Uploading from Mobile or Desktop later?
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                      Send an upload link to your SMS/Email so you can upload documents whenever ready.
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="ux4g-btn-outline-navy"
+                    style={{ fontSize: '0.84rem', padding: '8px 16px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                    onClick={() => setFollowUpSent(true)}>
+                    {followUpSent ? '✓ Upload Link Sent!' : '📲 Send Upload Link'}
+                  </button>
+                </div>
+
               </div>
-              <input
-                type="datetime-local"
-                className="ux4g-input"
-                required
-                value={incidentFields.incidentDate}
-                onChange={(e) => setIncidentFields({ ...incidentFields, incidentDate: e.target.value })}
-              />
+
             </div>
-
-            {/* ----------------------------------------------------------------- */}
-            {/* DYNAMIC CATEGORY-SPECIFIC FIELDS LOGIC                           */}
-            {/* ----------------------------------------------------------------- */}
-
-            {/* 1. WOMEN & CHILDREN FIELDS */}
-            {category?.id === 'women-children' && (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div className="ux4g-form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                      <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Suspect Handle / Phone / Profile
-                      </label>
-                      {incidentFields.suspectDetails && (
-                        <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      className="ux4g-input"
-                      required
-                      placeholder="e.g. @cyber_harasser_99 or +91 98765xxxx"
-                      value={incidentFields.suspectDetails}
-                      onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="ux4g-form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                      <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Social Media / Platform
-                      </label>
-                      {incidentFields.platform && (
-                        <span className="ux4g-confidence-badge">✓ Auto-Detected</span>
-                      )}
-                    </div>
-                    <select
-                      className="ux4g-input"
-                      required
-                      value={incidentFields.platform || 'Instagram'}
-                      onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value })}>
-                      <option value="Instagram">Instagram</option>
-                      <option value="WhatsApp">WhatsApp</option>
-                      <option value="Telegram">Telegram</option>
-                      <option value="X (Twitter)">X (Twitter)</option>
-                      <option value="Facebook">Facebook</option>
-                      <option value="Snapchat">Snapchat</option>
-                      <option value="Other Website">Other Website</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="ux4g-form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                    <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      Incident Content Type
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    className="ux4g-input"
-                    placeholder="e.g. Harassing messages, non-consensual photo, threat call"
-                    value={incidentFields.contentType}
-                    onChange={(e) => setIncidentFields({ ...incidentFields, contentType: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* 2. FINANCIAL FRAUD FIELDS */}
-            {category?.id === 'financial' && (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div className="ux4g-form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                      <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Financial Loss Amount (₹)
-                      </label>
-                      {incidentFields.financialLoss && (
-                        <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
-                      )}
-                    </div>
-                    <input
-                      type="number"
-                      className="ux4g-input"
-                      required
-                      placeholder="e.g. 25000"
-                      value={incidentFields.financialLoss}
-                      onChange={(e) => setIncidentFields({ ...incidentFields, financialLoss: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="ux4g-form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                      <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Bank Txn Ref / UTR Number
-                      </label>
-                      {incidentFields.transactionRef && (
-                        <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      className="ux4g-input"
-                      required
-                      placeholder="e.g. 423910294810"
-                      value={incidentFields.transactionRef}
-                      onChange={(e) => setIncidentFields({ ...incidentFields, transactionRef: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div className="ux4g-form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                      <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        Victim Bank Name
-                      </label>
-                      <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
-                    </div>
-                    <input
-                      type="text"
-                      className="ux4g-input"
-                      value={incidentFields.victimBank}
-                      onChange={(e) => setIncidentFields({ ...incidentFields, victimBank: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="ux4g-form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                      <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        Suspect UPI ID / Mobile
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      className="ux4g-input"
-                      placeholder="e.g. fraudster@upi or suspect mobile"
-                      value={incidentFields.suspectDetails}
-                      onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* 3. IDENTITY FRAUD / ACCOUNT TAKEOVER FIELDS */}
-            {category?.id === 'identity' && (
-              <>
-                <div className="ux4g-form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                    <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Compromised Account / SIM / Identity
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    className="ux4g-input"
-                    required
-                    placeholder="e.g. Instagram Handle, WhatsApp Number, SIM Card, Aadhaar ID"
-                    value={incidentFields.platform}
-                    onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value })}
-                  />
-                </div>
-
-                <div className="ux4g-form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                    <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      Suspect / Impersonator Contact
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    className="ux4g-input"
-                    placeholder="e.g. Impersonator profile link or phone number"
-                    value={incidentFields.suspectDetails}
-                    onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* 4. OTHER CATEGORIES */}
-            {category?.id !== 'women-children' && category?.id !== 'financial' && category?.id !== 'identity' && (
-              <>
-                <div className="ux4g-form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                    <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Platform / Website / Target System
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    className="ux4g-input"
-                    required
-                    placeholder="e.g. Website URL, App Name, IP Address, or System Name"
-                    value={incidentFields.platform || incidentFields.targetSystem}
-                    onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value, targetSystem: e.target.value })}
-                  />
-                </div>
-
-                <div className="ux4g-form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                    <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      Suspect Details
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    className="ux4g-input"
-                    placeholder="e.g. Suspect phone number, handle, or contact"
-                    value={incidentFields.suspectDetails}
-                    onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Full Complaint Description Preview */}
-            <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
-              <label className="ux4g-label">Full Complaint Description Provided</label>
-              <textarea
-                className="ux4g-input"
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button type="button" className="ux4g-btn ux4g-btn-secondary" onClick={() => setCurrentStep(1)}>
-                ← Back to Register Incident
-              </button>
-              <button
-                type="submit"
-                className="ux4g-btn ux4g-btn-primary"
-                style={{ flex: 1 }}
-                disabled={isSubmitting}>
-                {isSubmitting ? 'Registering Complaint...' : 'Register Official Cyber Crime Complaint →'}
-              </button>
-            </div>
-
-          </form>
+          )}
 
         </div>
-      )}
 
-      {/* ======================================================================= */}
-      {/* STEP 3: ACKNOWLEDGMENT RECEIPT                                          */}
-      {/* ======================================================================= */}
-      {currentStep === 3 && (
-        <div className="ux4g-card" style={{ textAlign: 'left', padding: '32px 24px' }}>
-          <div style={{ width: '56px', height: '56px', background: '#e6f4ea', borderRadius: '50%', color: '#188038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', marginBottom: '16px' }}>
-            ✓
-          </div>
+        {/* Right Side Bar (Persisted Case Summary Card for Women & Children ONLY in Steps 1 & 2) */}
+        {isWomenChildren && currentStep !== 3 && renderCaseSummaryCard()}
 
-          <h2 style={{ color: '#0A3161', margin: '0 0 8px 0' }}>Complaint Successfully Registered!</h2>
-          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px' }}>
-            Your incident report has been securely registered and assigned to the Cyber Crime Police Cell.
-          </p>
-
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '12px', marginBottom: '28px' }}>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>Acknowledgment Reference Number</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#0A3161', margin: '6px 0', letterSpacing: '1px' }}>
-              {ackNumber}
-            </div>
-            <div style={{ fontSize: '0.85rem', color: '#166534', background: '#dcfce7', padding: '4px 12px', borderRadius: '12px', display: 'inline-block' }}>
-              Status: Assigned to State Cyber Cell ({category?.title} {selectedSubCrime ? `- ${selectedSubCrime.name}` : ''})
-            </div>
-          </div>
-
-          {/* Registered Details Summary */}
-          <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '14px 16px', marginBottom: '24px', fontSize: '0.9rem' }}>
-            <div style={{ fontWeight: 600, color: '#334155', marginBottom: '8px' }}>Registered Incident Details:</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', color: '#475569' }}>
-              <div><strong>Incident Date:</strong> {new Date(incidentFields.incidentDate).toLocaleString()}</div>
-              <div><strong>Location (Auto-Enriched):</strong> {incidentFields.locationContext}</div>
-              {incidentFields.financialLoss && <div><strong>Financial Loss:</strong> ₹{incidentFields.financialLoss}</div>}
-              {incidentFields.transactionRef && <div><strong>Txn Ref / UTR:</strong> {incidentFields.transactionRef}</div>}
-              {incidentFields.platform && <div><strong>Platform:</strong> {incidentFields.platform}</div>}
-              {incidentFields.suspectDetails && <div><strong>Suspect Details:</strong> {incidentFields.suspectDetails}</div>}
-            </div>
-          </div>
-
-          {/* Optional Post-Submission Follow-Up Link */}
-          <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '14px', borderRadius: '10px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '0.88rem', color: '#0f172a' }}>📱 Add evidence documents later?</div>
-              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Send an upload link to SMS/Email for optional evidence attachments.</div>
-            </div>
-            <button
-              type="button"
-              className="ux4g-btn ux4g-btn-secondary"
-              style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}
-              onClick={() => setFollowUpSent(true)}>
-              {followUpSent ? '✓ Upload Link Sent!' : '📲 Send Upload Link'}
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button type="button" className="ux4g-btn ux4g-btn-secondary" onClick={() => window.print()}>
-              🖨️ Print Receipt
-            </button>
-            <button type="button" className="ux4g-btn ux4g-btn-primary" onClick={onBackToCategories}>
-              Return to Category Dashboard
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
 
     </div>
   );
