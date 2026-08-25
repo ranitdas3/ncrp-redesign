@@ -1,5 +1,6 @@
 import React from 'react';
 import { CRIME_CATEGORIES } from '../data/crimeCategories';
+import CategoryIcon from './CategoryIcon';
 
 export default function CategorySelection({ currentLang, onSelectCategory }) {
   return (
@@ -40,7 +41,7 @@ export default function CategorySelection({ currentLang, onSelectCategory }) {
             {/* Left Content Area: Icon + Title + Single-Line Summary */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: 0, paddingRight: '16px' }}>
               
-              {/* Wireframe Placeholder Icon Thumbnail */}
+              {/* Phosphor Icon Thumbnail */}
               <div style={{
                 width: '48px',
                 height: '44px',
@@ -49,10 +50,9 @@ export default function CategorySelection({ currentLang, onSelectCategory }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.4rem',
                 flexShrink: 0
               }}>
-                {category.icon}
+                <CategoryIcon categoryId={category.id} size={24} color="#0A3161" />
               </div>
 
               {/* Title & Single-Line Comma-Separated Sub-Crimes with Ellipsis */}

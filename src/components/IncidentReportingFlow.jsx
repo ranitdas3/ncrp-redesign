@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CategoryIcon from './CategoryIcon';
 
 export default function IncidentReportingFlow({ category, currentLang, onBackToCategories, isLoggedIn: initialIsLoggedIn = false }) {
   // Session Login State (Controllable via prop or interactive simulation toggle)
@@ -579,16 +580,14 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 <div style={{
                   width: '44px',
                   height: '44px',
-                  backgroundColor: '#6ba0c7',
+                  backgroundColor: '#e2e8f0',
                   borderRadius: '8px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.4rem',
-                  color: '#ffffff',
                   flexShrink: 0
                 }}>
-                  {category?.icon || '🛡️'}
+                  <CategoryIcon categoryId={category?.id} size={24} color="#0b2e59" />
                 </div>
                 <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.5px' }}>
                   {category.title}
