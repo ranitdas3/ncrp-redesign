@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function IncidentReportingFlow({ category, currentLang, onBackToCategories }) {
+export default function IncidentReportingFlow({ category, currentLang, onBackToCategories, isLoggedIn: initialIsLoggedIn = false }) {
+  // Session Login State (Controllable via prop or interactive simulation toggle)
+  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [detailsPage, setDetailsPage] = useState(1);
 
-  // Sub-Crime Selection State (No pill pre-selected by default)
+  // Sub-Crime Selection State
   const [selectedSubCrime, setSelectedSubCrime] = useState(null);
 
   // Intake State
@@ -18,9 +21,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
   // Evidence files list attached to the case
   const [attachedFiles, setAttachedFiles] = useState([]);
-
-  // Mandatory Terms & Declaration Checkbox State
-  const [isDeclarationAccepted, setIsDeclarationAccepted] = useState(false);
 
   // Dynamic Category-Specific Incident Details Fields
   const [incidentFields, setIncidentFields] = useState({
@@ -40,6 +40,19 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     compromisedIdentity: '',
   });
 
+  // CITIZEN LOGIN / AUTHENTICATION STEP STATE
+  const [loginTab, setLoginTab] = useState('otp'); // 'otp' or 'password'
+  const [citizenMobile, setCitizenMobile] = useState('9876543210');
+  const [citizenUserId, setCitizenUserId] = useState('');
+  const [citizenPassword, setCitizenPassword] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpInput, setOtpInput] = useState('');
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [captchaCode, setCaptchaCode] = useState('7K4P9X');
+  const [userCaptcha, setUserCaptcha] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [isDeclarationAccepted, setIsDeclarationAccepted] = useState(false);
+
   // Acknowledgment State
   const [ackNumber, setAckNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,6 +61,53 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   // Category Total Fields Calculation for Platform-Wide >5 Field Pagination Engine
   const totalCategoryFields = category?.id === 'women-children' ? 7 : category?.id === 'financial' ? 6 : 5;
   const hasMultipleDetailsPages = totalCategoryFields > 5;
+
+  // Generate random captcha code
+  const generateCaptcha = () => {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz';
+    let code = '';
+    const randomArray = new Uint32Array(6);
+    if (typeof window !== 'undefined' && window.crypto) {
+      window.crypto.getRandomValues(randomArray);
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(randomArray[i] % chars.length);
+      }
+    } else {
+      code = '9M2P8X';
+    }
+    setCaptchaCode(code);
+    setUserCaptcha('');
+  };
+
+  // Timer effect for OTP resend
+  useEffect(() => {
+    let interval = null;
+    if (otpTimer > 0) {
+      interval = setInterval(() => setOtpTimer((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpTimer]);
+
+  // Handle Send OTP in Citizen Login step
+  const handleSendOtp = (e) => {
+    if (e) e.preventDefault();
+    setAuthError('');
+    if (!citizenMobile || citizenMobile.length !== 10 || !/^\d+$/.test(citizenMobile)) {
+      setAuthError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
+      setAuthError('Invalid Captcha code. Please re-enter Captcha.');
+      generateCaptcha();
+      return;
+    }
+
+    setOtpSent(true);
+    setOtpTimer(30);
+    setOtpInput('849201'); // Pre-fill simulated 6-digit OTP for instant testing
+    generateCaptcha();
+  };
 
   // Feature: Speak Complaint (Voice Input Simulation)
   const handleToggleVoice = () => {
@@ -163,7 +223,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     ? { bg: '#fffbeb', color: '#d97706', border: '#fcd34d' }
     : { bg: '#f0fdf4', color: '#16a34a', border: '#86efac' };
 
-  // Proceed Handler
+  // Proceed Handler from Step 1
   const handleAnalyzeAndProceed = (directSubmit = false) => {
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -171,7 +231,11 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       autoExtractFromText(description);
 
       if (directSubmit) {
-        finalizeComplaint();
+        if (isLoggedIn) {
+          finalizeComplaint();
+        } else {
+          setCurrentStep(3); // Go to Citizen Login Verification step if not logged in
+        }
       } else {
         setCurrentStep(2);
         setDetailsPage(1);
@@ -179,15 +243,54 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }, 500);
   };
 
-  // Submit Handler
+  // Submit Handler for Final Complaint Registration
   const finalizeComplaint = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
       const generatedAck = 'NCRP-2026-' + Math.floor(100000 + Math.random() * 900000);
       setAckNumber(generatedAck);
-      setCurrentStep(3);
+      setCurrentStep(4); // Registration Receipt Screen
     }, 1000);
+  };
+
+  // Submit Handler for Citizen Verification step
+  const handleCitizenAuthAndFinalize = (e) => {
+    if (e) e.preventDefault();
+    setAuthError('');
+
+    if (loginTab === 'otp') {
+      if (!otpSent) {
+        setAuthError('Please click "Get OTP" to request your verification code.');
+        return;
+      }
+      if (!otpInput || otpInput.length !== 6) {
+        setAuthError('Please enter the 6-digit OTP.');
+        return;
+      }
+    } else {
+      if (!citizenUserId.trim()) {
+        setAuthError('Please enter your Citizen User ID.');
+        return;
+      }
+      if (!citizenPassword) {
+        setAuthError('Please enter your Password.');
+        return;
+      }
+      if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
+        setAuthError('Invalid Captcha code. Please re-enter Captcha.');
+        generateCaptcha();
+        return;
+      }
+    }
+
+    if (!isDeclarationAccepted) {
+      setAuthError('Please check the terms and policy declaration box to proceed.');
+      return;
+    }
+
+    setIsLoggedIn(true); // Mark citizen session as logged in
+    finalizeComplaint();
   };
 
   // Category-specific Action Button Label
@@ -199,7 +302,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     return '📸 Scan Screenshot / Receipt';
   };
 
-  // Case Summary Component (Persists dynamically across Steps 1 and 2 for ALL categories)
+  // Case Summary Component (Persists dynamically across Steps 1, 2, and 3 for ALL categories)
   const renderCaseSummaryCard = () => (
     <div style={{
       background: '#ffffff',
@@ -374,23 +477,26 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     </div>
   );
 
-  // Steps header list
-  const stepsList = hasMultipleDetailsPages
+  // Progressive Header Steps Definition (Dynamic depending on isLoggedIn state!)
+  const stepsList = isLoggedIn
     ? [
         { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
-        { num: 2, title: 'Incident Details', detail: 'Primary Info' },
-        { num: 3, title: 'Additional Details', detail: 'Secondary Info' },
-        { num: 4, title: 'Registration', detail: 'Acknowledgment number' }
+        { num: 2, title: 'Incident Details', detail: 'Primary & Additional Fields' },
+        { num: 3, title: 'Registration', detail: 'Acknowledgment number' }
       ]
     : [
         { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
-        { num: 2, title: 'Incident Details', detail: 'Category-Specific Fields' },
-        { num: 3, title: 'Registration', detail: 'Acknowledgment number' }
+        { num: 2, title: 'Incident Details', detail: 'Primary & Additional Fields' },
+        { num: 3, title: 'Citizen Login', detail: 'Mobile OTP Verification' },
+        { num: 4, title: 'Registration', detail: 'Acknowledgment number' }
       ];
 
-  const activeStepNum = currentStep === 1 ? 1 : currentStep === 3 ? (hasMultipleDetailsPages ? 4 : 3) : (detailsPage === 1 ? 2 : 3);
+  const activeStepNum = isLoggedIn
+    ? (currentStep === 4 || currentStep === 3 ? 3 : currentStep)
+    : currentStep;
+  
   const progressPercent = (activeStepNum / stepsList.length) * 100;
-  const showSummarySideCard = currentStep !== 3;
+  const showSummarySideCard = currentStep !== 4;
 
   return (
     <div style={{
@@ -673,8 +779,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 e.preventDefault();
                 if (hasMultipleDetailsPages && detailsPage === 1) {
                   setDetailsPage(2);
-                } else {
+                } else if (isLoggedIn) {
+                  // Direct registration if already logged in!
                   finalizeComplaint();
+                } else {
+                  // Move to Citizen Login / Verification Step if not logged in
+                  setCurrentStep(3);
                 }
               }}>
                 
@@ -926,8 +1036,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </>
                 )}
 
-                {/* Terms & Declaration Checkbox Box (Mandatory before registration) */}
-                {(!hasMultipleDetailsPages || detailsPage === 2) && (
+                {/* Declaration Checkbox for Logged In Citizens */}
+                {isLoggedIn && (!hasMultipleDetailsPages || detailsPage === 2) && (
                   <div style={{
                     background: '#f8fafc',
                     border: '1px solid #cbd5e1',
@@ -980,7 +1090,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </div>
                 )}
 
-                {/* Clean Action Buttons */}
+                {/* Action Buttons */}
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button
                     type="button"
@@ -999,12 +1109,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     type="submit"
                     className="ux4g-btn ux4g-btn-primary"
                     style={{ flex: 1 }}
-                    disabled={isSubmitting || ((!hasMultipleDetailsPages || detailsPage === 2) && !isDeclarationAccepted)}>
+                    disabled={isSubmitting || (isLoggedIn && (!hasMultipleDetailsPages || detailsPage === 2) && !isDeclarationAccepted)}>
                     {hasMultipleDetailsPages && detailsPage === 1
                       ? 'Continue to Additional Details →'
-                      : isSubmitting
-                      ? 'Registering Complaint...'
-                      : 'Register Official Cyber Crime Complaint →'}
+                      : isLoggedIn
+                      ? (isSubmitting ? 'Registering Complaint...' : 'Register Official Cyber Crime Complaint →')
+                      : 'Proceed to Citizen Verification →'}
                   </button>
                 </div>
 
@@ -1013,8 +1123,277 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           )}
 
-          {/* STEP 3: REGISTERED CONFIRMATION SCREEN */}
-          {currentStep === 3 && (
+          {/* STEP 3: FULL CITIZEN LOGIN & VERIFICATION STEP (SHOWN ONLY IF NOT LOGGED IN) */}
+          {currentStep === 3 && !isLoggedIn && (
+            <div className="ux4g-card">
+              
+              {/* Header Title */}
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '1.4rem', color: '#0b2e59', fontWeight: 700 }}>
+                  Citizen Verification & Login
+                </h2>
+                <div style={{ fontSize: '0.88rem', color: '#64748b' }}>
+                  Authenticate your citizen identity before official complaint registration.
+                </div>
+              </div>
+
+              {/* Authentication Mode Tabs */}
+              <div className="ux4g-tabs" style={{ marginBottom: '20px' }}>
+                <button 
+                  type="button"
+                  className={`ux4g-tab-btn ${loginTab === 'otp' ? 'active' : ''}`}
+                  onClick={() => { setLoginTab('otp'); setAuthError(''); }}>
+                  📱 Mobile OTP
+                </button>
+                <button 
+                  type="button"
+                  className={`ux4g-tab-btn ${loginTab === 'password' ? 'active' : ''}`}
+                  onClick={() => { setLoginTab('password'); setAuthError(''); }}>
+                  🔑 User ID & Password
+                </button>
+              </div>
+
+              {/* Error Alert */}
+              {authError && (
+                <div className="ux4g-alert ux4g-alert-error" style={{ marginBottom: '16px', padding: '10px 14px', borderRadius: '8px' }}>
+                  ⚠️ {authError}
+                </div>
+              )}
+
+              <form onSubmit={handleCitizenAuthAndFinalize}>
+                {loginTab === 'otp' ? (
+                  /* TAB 1: Mobile OTP Flow */
+                  <>
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <label className="ux4g-label">
+                        Registered Mobile Number <span style={{ color: '#d93025' }}>*</span>
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ padding: '10px 14px', background: '#e9ecef', border: '1.5px solid #cbd5e1', borderRadius: '8px', fontWeight: 'bold', color: '#475569' }}>
+                          +91
+                        </div>
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          className="ux4g-input"
+                          placeholder="Enter 10-digit mobile number"
+                          value={citizenMobile}
+                          onChange={(e) => setCitizenMobile(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* CAPTCHA SECTION */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <label className="ux4g-label">
+                        Enter Captcha Code <span style={{ color: '#d93025' }}>*</span>
+                      </label>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{
+                          background: '#0b2e59',
+                          color: '#ffffff',
+                          fontFamily: 'monospace',
+                          fontSize: '1.25rem',
+                          fontWeight: 'bold',
+                          letterSpacing: '4px',
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          userSelect: 'none'
+                        }}>
+                          {captchaCode}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={generateCaptcha}
+                          style={{ background: 'none', border: 'none', color: '#0b2e59', fontSize: '1.2rem', cursor: 'pointer' }}
+                          title="Refresh Captcha">
+                          🔄
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        placeholder="Type the 6-character captcha above"
+                        value={userCaptcha}
+                        onChange={(e) => setUserCaptcha(e.target.value)}
+                      />
+                    </div>
+
+                    {!otpSent ? (
+                      <button
+                        type="button"
+                        className="ux4g-btn ux4g-btn-secondary ux4g-btn-block"
+                        style={{ marginBottom: '20px' }}
+                        onClick={handleSendOtp}>
+                        📲 Get OTP Code
+                      </button>
+                    ) : (
+                      <div className="ux4g-form-group" style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <label className="ux4g-label" style={{ margin: 0 }}>
+                            Enter 6-Digit OTP <span style={{ color: '#d93025' }}>*</span>
+                          </label>
+                          <span style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>
+                            ✓ OTP Sent to +91 {citizenMobile}
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          className="ux4g-input"
+                          placeholder="Enter 6-digit OTP code"
+                          value={otpInput}
+                          onChange={(e) => setOtpInput(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* TAB 2: User ID & Password Flow */
+                  <>
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <label className="ux4g-label">
+                        Citizen User ID <span style={{ color: '#d93025' }}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        placeholder="Enter registered User ID / Email"
+                        value={citizenUserId}
+                        onChange={(e) => setCitizenUserId(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                      <label className="ux4g-label">
+                        Password <span style={{ color: '#d93025' }}>*</span>
+                      </label>
+                      <input
+                        type="password"
+                        className="ux4g-input"
+                        placeholder="Enter your password"
+                        value={citizenPassword}
+                        onChange={(e) => setCitizenPassword(e.target.value)}
+                      />
+                    </div>
+
+                    {/* CAPTCHA SECTION */}
+                    <div className="ux4g-form-group" style={{ marginBottom: '20px' }}>
+                      <label className="ux4g-label">
+                        Enter Captcha Code <span style={{ color: '#d93025' }}>*</span>
+                      </label>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{
+                          background: '#0b2e59',
+                          color: '#ffffff',
+                          fontFamily: 'monospace',
+                          fontSize: '1.25rem',
+                          fontWeight: 'bold',
+                          letterSpacing: '4px',
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          userSelect: 'none'
+                        }}>
+                          {captchaCode}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={generateCaptcha}
+                          style={{ background: 'none', border: 'none', color: '#0b2e59', fontSize: '1.2rem', cursor: 'pointer' }}
+                          title="Refresh Captcha">
+                          🔄
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        className="ux4g-input"
+                        placeholder="Type the 6-character captcha above"
+                        value={userCaptcha}
+                        onChange={(e) => setUserCaptcha(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Mandatory Terms & Declaration Checkbox Box */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '14px 18px',
+                  marginBottom: '20px'
+                }}>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    cursor: 'pointer',
+                    margin: 0
+                  }}>
+                    <input
+                      type="checkbox"
+                      required
+                      checked={isDeclarationAccepted}
+                      onChange={(e) => setIsDeclarationAccepted(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        marginTop: '2px',
+                        accentColor: '#0b2e59',
+                        cursor: 'pointer',
+                        flexShrink: 0
+                      }}
+                    />
+                    <span style={{ fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.45 }}>
+                      I declare that the information provided is correct to the best of my knowledge under Indian Laws. I have read the{' '}
+                      <a
+                        href="https://cybercrime.gov.in/Webform/FAQ.aspx"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
+                        onClick={(e) => e.stopPropagation()}>
+                        FAQ
+                      </a>{' '}
+                      and agree to the portal's{' '}
+                      <a
+                        href="https://cybercrime.gov.in/Webform/privacy_policy.aspx"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
+                        onClick={(e) => e.stopPropagation()}>
+                        Privacy Policy
+                      </a>.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Clean Action Buttons */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    type="button"
+                    className="ux4g-btn ux4g-btn-secondary"
+                    onClick={() => setCurrentStep(2)}>
+                    ← Back to Incident Details
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="ux4g-btn ux4g-btn-primary"
+                    style={{ flex: 1 }}
+                    disabled={isSubmitting || !isDeclarationAccepted}>
+                    {isSubmitting
+                      ? 'Authenticating & Registering...'
+                      : 'Verify & Register Official Cyber Crime Complaint →'}
+                  </button>
+                </div>
+
+              </form>
+
+            </div>
+          )}
+
+          {/* STEP 4: REGISTERED CONFIRMATION SCREEN */}
+          {currentStep === 4 && (
             <div>
               
               {/* Main Official Registration Card */}
@@ -1188,7 +1567,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
         </div>
 
-        {/* Right Side Bar (Persistent Case Summary Card dynamically active for ALL categories in Steps 1 & 2) */}
+        {/* Right Side Bar (Persistent Case Summary Card dynamically active for ALL categories in Steps 1, 2 & 3) */}
         {showSummarySideCard && renderCaseSummaryCard()}
 
       </div>
