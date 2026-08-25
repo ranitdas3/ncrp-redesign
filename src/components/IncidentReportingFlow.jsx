@@ -3,9 +3,8 @@ import React, { useState } from 'react';
 export default function IncidentReportingFlow({ category, currentLang, onBackToCategories }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [detailsPage, setDetailsPage] = useState(1);
-  const isWomenChildren = category?.id === 'women-children';
 
-  // Sub-Crime Selection State
+  // Sub-Crime Selection State (No pill pre-selected by default)
   const [selectedSubCrime, setSelectedSubCrime] = useState(null);
 
   // Intake State
@@ -14,7 +13,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const [voiceTimer, setVoiceTimer] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Evidence Options Menu Modal / Popover State
+  // Evidence Options Menu Popover State
   const [showEvidenceMenu, setShowEvidenceMenu] = useState(false);
 
   // Evidence files list attached to the case
@@ -30,10 +29,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     suspectIpEmail: '',
     witnessContact: '',
 
-    financialLoss: '32500',
-    transactionRef: '429184029102',
+    financialLoss: category?.id === 'financial' ? '32500' : '',
+    transactionRef: category?.id === 'financial' ? '429184029102' : '',
     victimBank: 'State Bank of India',
     targetSystem: '',
+    phishingUrl: '',
+    compromisedIdentity: '',
   });
 
   // Acknowledgment State
@@ -41,8 +42,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [followUpSent, setFollowUpSent] = useState(false);
 
-  // Total fields count logic
-  const totalCategoryFields = isWomenChildren ? 7 : category?.id === 'financial' ? 6 : 4;
+  // Category Total Fields Calculation for Platform-Wide >5 Field Pagination Engine
+  const totalCategoryFields = category?.id === 'women-children' ? 7 : category?.id === 'financial' ? 6 : 5;
   const hasMultipleDetailsPages = totalCategoryFields > 5;
 
   // Feature: Speak Complaint (Voice Input Simulation)
@@ -57,7 +58,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           if (prev >= 3) {
             clearInterval(timer);
             setIsRecordingVoice(false);
-            const voiceText = 'Incident occurred yesterday around 8 PM on Instagram. Received threatening harassment messages from profile @cyber_harasser_99.';
+            const voiceText = `Incident report for ${category?.title}. Details captured via voice intake. Suspect handle @cyber_suspect_99.`;
             setDescription((p) => (p ? `${p}\n${voiceText}` : voiceText));
             autoExtractFromText(voiceText);
             setAttachedFiles((prevFiles) => [
@@ -81,7 +82,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       setShowEvidenceMenu(false);
       setTimeout(() => {
         setIsAnalyzing(false);
-        const scannedText = `[Scanned ${optionType} from ${firstFile.name}]: Suspect handle @cyber_harasser_99 on Telegram. Loss amount Rs 25,000 via UTR 429184029102.`;
+        const scannedText = `[Scanned ${optionType} from ${firstFile.name}]: Details extracted for ${category?.title}. Loss/Ref info: UTR 429184029102.`;
         setDescription((prev) => (prev ? `${prev}\n${scannedText}` : scannedText));
         autoExtractFromText(scannedText);
         
@@ -131,6 +132,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     if (textLower.includes('instagram')) extractedPlatform = 'Instagram';
     else if (textLower.includes('whatsapp')) extractedPlatform = 'WhatsApp';
     else if (textLower.includes('telegram')) extractedPlatform = 'Telegram';
+    else if (textLower.includes('phonepe') || textLower.includes('gpay') || textLower.includes('upi')) extractedPlatform = 'UPI App';
 
     setIncidentFields((prev) => ({
       ...prev,
@@ -145,7 +147,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const calculateEvidenceScore = () => {
     let score = 0;
     if (selectedSubCrime) score += 1;
-    if (description.trim().length > 15 || incidentFields.suspectDetails) score += 1;
+    if (description.trim().length > 15 || incidentFields.suspectDetails || incidentFields.financialLoss) score += 1;
     if (attachedFiles.length > 0 || isRecordingVoice) score += 1;
     return score;
   };
@@ -185,17 +187,16 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }, 1000);
   };
 
-  const containerMaxWidth = isWomenChildren && currentStep !== 3 ? '1180px' : '820px';
-
-  // Category-specific Fast Intake Button Label
+  // Category-specific Action Button Label
   const getActionBtnLabel = () => {
-    if (isWomenChildren) return '📸 Add Evidence';
+    if (category?.id === 'women-children') return '📸 Add Evidence';
     if (category?.id === 'financial') return '📸 Scan Receipt / Screenshot';
     if (category?.id === 'identity') return '📸 Upload Profile / Chat Screenshot';
+    if (category?.id === 'technical') return '📸 Attach Log / System Report';
     return '📸 Scan Screenshot / Receipt';
   };
 
-  // Case Summary Component (Persists across Steps 1 and 2 for Women & Children, NOT in Step 3)
+  // Case Summary Component (Persists dynamically across Steps 1 and 2 for ALL categories)
   const renderCaseSummaryCard = () => (
     <div style={{
       background: '#ffffff',
@@ -208,7 +209,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       position: 'sticky',
       top: '20px'
     }}>
-      {/* Case Summary Top Header */}
+      {/* Case Summary Header */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#fafafa' }}>
         <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
           CASE SUMMARY
@@ -256,11 +257,11 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       </div>
 
-      {/* Category & Sub-Category Rows */}
+      {/* Dynamic Category & Sub-Category Summary Rows */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
           <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>CATEGORY</span>
-          <span style={{ fontWeight: 600, color: '#0f172a' }}>Women & Children</span>
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>{category?.title}</span>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
@@ -269,6 +270,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             {selectedSubCrime ? selectedSubCrime.name : 'Not selected yet'}
           </span>
         </div>
+
+        {incidentFields.financialLoss && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>LOSS AMOUNT</span>
+            <span style={{ fontWeight: 700, color: '#b91c1c' }}>₹{incidentFields.financialLoss}</span>
+          </div>
+        )}
+
+        {incidentFields.transactionRef && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>UTRN / REF</span>
+            <span style={{ fontWeight: 600, color: '#0f172a' }}>{incidentFields.transactionRef}</span>
+          </div>
+        )}
 
         {incidentFields.platform && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
@@ -285,7 +300,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         )}
       </div>
 
-      {/* Evidence Section with Delete and Direct Add Buttons */}
+      {/* Evidence Section with Delete and Direct Add Controls */}
       <div style={{ padding: '16px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.4px' }}>
@@ -356,7 +371,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     </div>
   );
 
-  // Steps header labels
+  // Steps header list
   const stepsList = hasMultipleDetailsPages
     ? [
         { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
@@ -372,9 +387,16 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
   const activeStepNum = currentStep === 1 ? 1 : currentStep === 3 ? (hasMultipleDetailsPages ? 4 : 3) : (detailsPage === 1 ? 2 : 3);
   const progressPercent = (activeStepNum / stepsList.length) * 100;
+  const showSummarySideCard = currentStep !== 3;
 
   return (
-    <div style={{ maxWidth: containerMaxWidth, margin: '24px auto', padding: '0 20px', textAlign: 'left', transition: 'max-width 0.3s ease' }}>
+    <div style={{
+      maxWidth: showSummarySideCard ? '1180px' : '820px',
+      margin: '24px auto',
+      padding: '0 20px',
+      textAlign: 'left',
+      transition: 'max-width 0.3s ease'
+    }}>
       
       {/* Back Navigation Button */}
       <div style={{ marginBottom: '16px' }}>
@@ -433,17 +455,17 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       </div>
 
-      {/* Main Grid Wrapper (Persistent Side Card for Women & Children ONLY in Steps 1 & 2) */}
-      <div style={isWomenChildren && currentStep !== 3 ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
+      {/* Main Grid Wrapper (Persistent Side Card for ALL categories in Steps 1 & 2) */}
+      <div style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
         
         {/* Left Form Area */}
         <div>
 
-          {/* STEP 1 FOR WOMEN & CHILDREN */}
-          {currentStep === 1 && isWomenChildren && (
+          {/* STEP 1: DYNAMIC EXPRESS INTAKE LAYOUT FOR ALL CATEGORIES */}
+          {currentStep === 1 && (
             <div className="ux4g-wireframe-card">
               
-              {/* Header with Emoji Icon Box + Category Title */}
+              {/* Header with Icon Box + Category Title */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
                 <div style={{
                   width: '44px',
@@ -457,7 +479,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   color: '#ffffff',
                   flexShrink: 0
                 }}>
-                  👩‍👧‍👦
+                  {category?.icon || '🛡️'}
                 </div>
                 <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.5px' }}>
                   {category.title}
@@ -486,7 +508,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 </div>
               </div>
 
-              {/* Description Section with Red Star + Speak & Dynamic Add Evidence Buttons Above */}
+              {/* Description Section with Red Star + Fast Intake Buttons */}
               <div style={{ marginTop: '32px', marginBottom: '16px', position: 'relative' }}>
                 <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
                   <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> GIVE DESCRIPTION OF THE INCIDENT
@@ -516,7 +538,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     🎙️ {isRecordingVoice ? `Recording... (${voiceTimer}s)` : 'Speak Complaint'}
                   </button>
 
-                  {/* Dynamic Add Evidence Action Button */}
+                  {/* Dynamic Evidence Action Button */}
                   <button
                     type="button"
                     onClick={() => setShowEvidenceMenu(!showEvidenceMenu)}
@@ -630,61 +652,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           )}
 
-          {/* STEP 1 FOR OTHER CATEGORIES */}
-          {currentStep === 1 && !isWomenChildren && (
-            <div className="ux4g-card" style={{ textAlign: 'left' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '2rem' }}>{category.icon}</span>
-                <div>
-                  <h2 style={{ margin: 0, color: '#0A3161', fontSize: '1.4rem' }}>{category.title}</h2>
-                  <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Select the specific type of incident that occurred</p>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-                {category.subCrimes.map((sub) => (
-                  <div
-                    key={sub.id}
-                    onClick={() => setSelectedSubCrime(sub)}
-                    style={{
-                      padding: '14px',
-                      borderRadius: '10px',
-                      border: selectedSubCrime?.id === sub.id ? '2px solid #0A3161' : '1px solid #cbd5e1',
-                      background: selectedSubCrime?.id === sub.id ? '#e8f0fe' : '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a', marginBottom: '4px' }}>
-                      {sub.name}
-                    </div>
-                    <span style={{ fontSize: '0.75rem', background: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
-                      {sub.tag}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="ux4g-form-group">
-                <label className="ux4g-label">Incident Description</label>
-                <textarea
-                  className="ux4g-input"
-                  rows={4}
-                  placeholder="Describe what happened..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              <button
-                type="button"
-                className="ux4g-btn ux4g-btn-primary ux4g-btn-block"
-                onClick={() => handleAnalyzeAndProceed(false)}>
-                Proceed to Incident Details →
-              </button>
-            </div>
-          )}
-
-          {/* STEP 2: CATEGORY-SPECIFIC INCIDENT DETAILS */}
+          {/* STEP 2: DYNAMIC CATEGORY-SPECIFIC INCIDENT DETAILS */}
           {currentStep === 2 && (
             <div className="ux4g-card">
               
@@ -710,7 +678,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 {/* PAGE 1: PRIMARY FIELDS */}
                 {detailsPage === 1 && (
                   <>
-                    {/* Field 1: Incident Date & Time */}
+                    {/* Common Field 1: Incident Date & Time */}
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -727,68 +695,181 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       />
                     </div>
 
-                    {/* Field 2: Suspect Handle / Phone / Profile */}
-                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Suspect Handle / Phone / Profile
-                        </label>
-                        {incidentFields.suspectDetails && (
-                          <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
-                        )}
-                      </div>
-                      <input
-                        type="text"
-                        className="ux4g-input"
-                        required
-                        placeholder="e.g. @cyber_harasser_99 or +91 98765xxxx"
-                        value={incidentFields.suspectDetails}
-                        onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
-                      />
-                    </div>
+                    {/* DYNAMIC CATEGORY FIELDS */}
 
-                    {/* Field 3: Social Media / Platform */}
-                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Social Media / Platform
-                        </label>
-                        {incidentFields.platform && (
-                          <span className="ux4g-confidence-badge">✓ Auto-Detected</span>
-                        )}
-                      </div>
-                      <select
-                        className="ux4g-input"
-                        required
-                        value={incidentFields.platform || 'Instagram'}
-                        onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value })}>
-                        <option value="Instagram">Instagram</option>
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="Telegram">Telegram</option>
-                        <option value="X (Twitter)">X (Twitter)</option>
-                        <option value="Facebook">Facebook</option>
-                        <option value="Snapchat">Snapchat</option>
-                        <option value="Other Website">Other Website</option>
-                      </select>
-                    </div>
+                    {/* 1. FINANCIAL FRAUD FIELDS */}
+                    {category?.id === 'financial' && (
+                      <>
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Financial Loss Amount (₹)
+                            </label>
+                            {incidentFields.financialLoss && (
+                              <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                            )}
+                          </div>
+                          <input
+                            type="number"
+                            className="ux4g-input"
+                            required
+                            placeholder="e.g. 25000"
+                            value={incidentFields.financialLoss}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, financialLoss: e.target.value })}
+                          />
+                        </div>
 
-                    {/* Field 4: Incident Content Type */}
-                    <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          Incident Content Type
-                        </label>
-                      </div>
-                      <input
-                        type="text"
-                        className="ux4g-input"
-                        placeholder="e.g. Harassing messages, non-consensual photo, threat call"
-                        value={incidentFields.contentType}
-                        onChange={(e) => setIncidentFields({ ...incidentFields, contentType: e.target.value })}
-                      />
-                    </div>
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Bank Txn Ref / UTR Number
+                            </label>
+                            {incidentFields.transactionRef && (
+                              <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            required
+                            placeholder="e.g. 423910294810"
+                            value={incidentFields.transactionRef}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, transactionRef: e.target.value })}
+                          />
+                        </div>
 
-                    {/* Field 5: Incident Location Context */}
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              Victim Bank Name
+                            </label>
+                            <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            value={incidentFields.victimBank}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, victimBank: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              Suspect UPI ID / Mobile / Bank Account
+                            </label>
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            placeholder="e.g. fraudster@upi or suspect mobile"
+                            value={incidentFields.suspectDetails}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* 2. WOMEN & CHILDREN FIELDS */}
+                    {category?.id === 'women-children' && (
+                      <>
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Suspect Handle / Phone / Profile
+                            </label>
+                            {incidentFields.suspectDetails && (
+                              <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            required
+                            placeholder="e.g. @cyber_harasser_99 or +91 98765xxxx"
+                            value={incidentFields.suspectDetails}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Social Media / Platform
+                            </label>
+                            {incidentFields.platform && (
+                              <span className="ux4g-confidence-badge">✓ Auto-Detected</span>
+                            )}
+                          </div>
+                          <select
+                            className="ux4g-input"
+                            required
+                            value={incidentFields.platform || 'Instagram'}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value })}>
+                            <option value="Instagram">Instagram</option>
+                            <option value="WhatsApp">WhatsApp</option>
+                            <option value="Telegram">Telegram</option>
+                            <option value="X (Twitter)">X (Twitter)</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Snapchat">Snapchat</option>
+                            <option value="Other Website">Other Website</option>
+                          </select>
+                        </div>
+
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              Incident Content Type
+                            </label>
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            placeholder="e.g. Harassing messages, non-consensual photo, threat call"
+                            value={incidentFields.contentType}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, contentType: e.target.value })}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* 3. IDENTITY FRAUD / OTHER CATEGORIES DEFAULT FIELDS */}
+                    {category?.id !== 'financial' && category?.id !== 'women-children' && (
+                      <>
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Target Platform / Website / Account
+                            </label>
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            required
+                            placeholder="e.g. Instagram, WhatsApp, Bank Portal, SIM Card, URL"
+                            value={incidentFields.platform || incidentFields.targetSystem}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, platform: e.target.value, targetSystem: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              Suspect Details / Contact
+                            </label>
+                          </div>
+                          <input
+                            type="text"
+                            className="ux4g-input"
+                            placeholder="e.g. Suspect phone number, handle, or contact"
+                            value={incidentFields.suspectDetails}
+                            onChange={(e) => setIncidentFields({ ...incidentFields, suspectDetails: e.target.value })}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Common Field 5: Incident Location Context */}
                     <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -807,10 +888,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </>
                 )}
 
-                {/* PAGE 2: SECONDARY FIELDS */}
+                {/* PAGE 2: SECONDARY FIELDS (IF >5 FIELDS TOTAL) */}
                 {detailsPage === 2 && (
                   <>
-                    {/* Field 6: Suspect IP / Secondary Contact */}
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -826,7 +906,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       />
                     </div>
 
-                    {/* Field 7: Witness Reference Contact */}
                     <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -877,11 +956,11 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           )}
 
-          {/* STEP 3: REGISTERED CONFIRMATION SCREEN MATCHING WIREFRAME EXACTLY */}
+          {/* STEP 3: REGISTERED CONFIRMATION SCREEN (DYNAMIC FOR ALL CATEGORIES) */}
           {currentStep === 3 && (
             <div>
               
-              {/* Main Official Registration Box */}
+              {/* Main Official Registration Card */}
               <div className="ux4g-card" style={{ textAlign: 'left', padding: '32px 36px' }}>
                 
                 {/* Header Success Row */}
@@ -917,7 +996,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   border: '1px solid #e2e8f0',
                   borderRadius: '12px',
                   padding: '20px 24px',
-                  marginBottom: '20px'
+                  marginBottom: '24px'
                 }}>
                   <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
                     OFFICIAL ACKNOWLEDGMENT NUMBER
@@ -1014,7 +1093,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </label>
                 </div>
 
-                {/* Uploading from Mobile or Desktop Later Link Box */}
+                {/* Mobile/Desktop Link Box */}
                 <div style={{
                   border: '1px solid #e2e8f0',
                   borderRadius: '10px',
@@ -1052,8 +1131,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
         </div>
 
-        {/* Right Side Bar (Persisted Case Summary Card for Women & Children ONLY in Steps 1 & 2) */}
-        {isWomenChildren && currentStep !== 3 && renderCaseSummaryCard()}
+        {/* Right Side Bar (Persistent Case Summary Card dynamically active for ALL categories in Steps 1 & 2) */}
+        {showSummarySideCard && renderCaseSummaryCard()}
 
       </div>
 
