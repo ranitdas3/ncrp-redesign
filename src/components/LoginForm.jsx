@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import TrackComplaint from './TrackComplaint';
 
 export default function LoginForm({ language }) {
   const [activeTab, setActiveTab] = useState('otp'); // 'otp' or 'password'
@@ -131,6 +132,12 @@ export default function LoginForm({ language }) {
             onClick={() => { setActiveTab('password'); setErrorMessage(''); setSuccessMessage(''); }}>
             {language === 'hi' ? '🔑 यूजर आई डी व पासवर्ड' : '🔑 User ID & Password'}
           </button>
+          <button 
+            type="button"
+            className={`ux4g-tab-btn ${activeTab === 'track' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('track'); setErrorMessage(''); setSuccessMessage(''); }}>
+            {language === 'hi' ? '🔍 शिकायत ट्रैक करें' : '🔍 Track your Complaint'}
+          </button>
         </div>
 
         {/* Error Alert */}
@@ -147,8 +154,11 @@ export default function LoginForm({ language }) {
           </div>
         )}
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit}>
+        {/* Login Form / Track Form */}
+        {activeTab === 'track' ? (
+          <TrackComplaint currentLang={language} />
+        ) : (
+          <form onSubmit={handleSubmit}>
           {activeTab === 'otp' ? (
             /* TAB 1: Mobile OTP Flow */
             <>
@@ -296,6 +306,7 @@ export default function LoginForm({ language }) {
             )}
           </div>
         </form>
+        )}
 
         {/* MeriPehchaan / SSO Integration */}
         <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #e0e0e0', textAlign: 'center' }}>

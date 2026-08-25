@@ -37,6 +37,7 @@ export const CRIME_CATEGORIES = [
       { id: 'phishing', name: 'Phishing Email / Fraudulent SMS Link', tag: 'Cyber' },
       { id: 'remote-access-fraud', name: 'Remote-Access Fraud (AnyDesk / TeamViewer)', tag: 'Critical' },
       { id: 'digital-arrest-scam', name: 'Digital Arrest Scam (CBI / Police Video Call Scam)', tag: 'Critical' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   },
   {
@@ -54,6 +55,7 @@ export const CRIME_CATEGORIES = [
       { id: 'aadhaar-misuse', name: 'Aadhaar / Identity Misuse', tag: 'Identity' },
       { id: 'email-compromise', name: 'Email Account Compromise', tag: 'Security' },
       { id: 'social-media-takeover', name: 'Social-Media Takeover', tag: 'Social Media' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   },
   {
@@ -71,6 +73,7 @@ export const CRIME_CATEGORIES = [
       { id: 'sextortion', name: 'Sextortion', tag: 'Critical' },
       { id: 'impersonation-abuse', name: 'Online Impersonation', tag: 'Abuse' },
       { id: 'obscene-content', name: 'Obscene Content', tag: 'Abuse' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   },
   {
@@ -87,6 +90,7 @@ export const CRIME_CATEGORIES = [
       { id: 'ransomware', name: 'Ransomware Attack', tag: 'Critical' },
       { id: 'unauthorized-access', name: 'Unauthorized Access', tag: 'Security' },
       { id: 'data-theft', name: 'Data Theft / Data Leakage', tag: 'Security' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   },
   {
@@ -102,6 +106,7 @@ export const CRIME_CATEGORIES = [
       { id: 'fraudulent-websites', name: 'Fraudulent Website', tag: 'Domain' },
       { id: 'malicious-ads', name: 'Malicious Advertisement', tag: 'Content' },
       { id: 'illegal-abusive-content', name: 'Illegal Online Content', tag: 'Content' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   },
   {
@@ -113,7 +118,8 @@ export const CRIME_CATEGORIES = [
     summary: 'Any other cybercrime, online scam, or suspicious activity not listed above...',
     description: 'Report any other cybercrime or suspicious online incident not covered in the specific categories above.',
     subCrimes: [
-      { id: 'other-cyber-crime', name: 'Other Cyber Crime', tag: 'General' }
+      { id: 'other-cyber-crime', name: 'Other Cyber Crime', tag: 'General' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   }
 ];
