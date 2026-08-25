@@ -9,11 +9,12 @@ export const CRIME_CATEGORIES = [
     summary: 'Online Sexual Exploitation, Child Sexual Abuse Material, Grooming, Cyberstalking, Intimate image abuse',
     description: 'Reporting sensitive cybercrimes involving women and children. Option for anonymous reporting is available.',
     subCrimes: [
-      { id: 'online-sexual-exploitation', name: 'Online Sexual Exploitation', tag: 'High Severity' },
+      { id: 'online-sexual-exploitation', name: 'Online sexual Exploitation', tag: 'High Severity' },
       { id: 'csam', name: 'Child Sexual Abuse Material (CSAM)', tag: 'Critical' },
       { id: 'grooming', name: 'Online Grooming', tag: 'High Severity' },
-      { id: 'cyberstalking-wc', name: 'Cyberstalking', tag: 'Harassment' },
-      { id: 'intimate-image-abuse', name: 'Intimate-Image Abuse (Non-consensual sharing)', tag: 'Critical' },
+      { id: 'cyberstalking-wc', name: 'CyberStalking', tag: 'Harassment' },
+      { id: 'intimate-image-abuse', name: 'Intimate-Image Abuse (Non-consensual Sharing)', tag: 'Critical' },
+      { id: 'uncategorised', name: 'Uncategorised', tag: 'General' },
     ]
   },
   {

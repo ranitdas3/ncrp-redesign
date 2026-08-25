@@ -251,3 +251,97 @@ body {
   color: var(--ux4g-success);
   border: 1px solid var(--ux4g-success);
 }
+
+/* Wireframe & Express Complaint Flow Extension Tokens */
+.ux4g-wireframe-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 36px 40px;
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.ux4g-pill-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1e293b;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ux4g-pill-chip:hover {
+  border-color: #0b2e59;
+  background-color: #f8fafc;
+}
+
+.ux4g-pill-chip.selected {
+  background-color: #E5F0FF;
+  color: #0b2e59;
+  border: 1.5px solid #0b2e59;
+  font-weight: 600;
+}
+
+.ux4g-confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ux4g-btn-dark-navy {
+  background-color: #0b2e59;
+  color: #ffffff;
+  border: 1.5px solid #0b2e59;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ux4g-btn-dark-navy:hover {
+  background-color: #082447;
+  border-color: #082447;
+}
+
+.ux4g-btn-outline-navy {
+  background-color: #ffffff;
+  color: #0b2e59;
+  border: 1.5px solid #0b2e59;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ux4g-btn-outline-navy:hover {
+  background-color: #f8fafc;
+}
+
+.ux4g-voice-pulse {
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+  70% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+  100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
