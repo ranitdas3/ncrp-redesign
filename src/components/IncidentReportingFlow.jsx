@@ -843,8 +843,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   <>
                     {/* Common Field 1: Incident Date & Time */}
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                           <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> When did this happen? (An estimate is fine)
                         </label>
                         <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
@@ -864,8 +864,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     {category?.id === 'financial' && (
                       <>
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Financial Loss Amount (₹)
                             </label>
                             {incidentFields.financialLoss && (
@@ -883,8 +883,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         </div>
 
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Bank Txn Ref / UTR Number
                             </label>
                             {incidentFields.transactionRef && (
@@ -902,8 +902,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         </div>
 
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               Victim Bank Name
                             </label>
                             <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
@@ -917,8 +917,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         </div>
 
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               Suspect UPI ID / Mobile / Bank Account
                             </label>
                           </div>
@@ -937,8 +937,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     {category?.id === 'women-children' && (
                       <>
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Suspect Handle / Phone / Profile
                             </label>
                             {incidentFields.suspectDetails && (
@@ -956,8 +956,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         </div>
 
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Social Media / Platform
                             </label>
                             {incidentFields.platform && (
@@ -980,8 +980,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         </div>
 
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               Incident Content Type
                             </label>
                           </div>
@@ -1000,8 +1000,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     {category?.id !== 'financial' && category?.id !== 'women-children' && (
                       <>
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Target Platform / Website / Account
                             </label>
                           </div>
@@ -1016,8 +1016,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         </div>
 
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                            <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                               Suspect Details / Contact
                             </label>
                           </div>
@@ -1034,8 +1034,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
                     {/* Common Field 5: Incident Location Context */}
                     <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                           <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Location / Network City
                         </label>
                         <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
@@ -1055,8 +1055,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 {detailsPage === 2 && (
                   <>
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                           Secondary Suspect IP / Contact Email
                         </label>
                       </div>
@@ -1070,8 +1070,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     </div>
 
                     <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
-                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px', flexWrap: 'wrap' }}>
+                        <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'normal', lineHeight: 1.35 }}>
                           Witness Contact / Secondary Reference
                         </label>
                       </div>
@@ -1141,7 +1141,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 )}
 
                 {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="ux4g-mobile-btn-wrap" style={{ display: 'flex', gap: '12px' }}>
                   <button
                     type="button"
                     className="ux4g-btn ux4g-btn-secondary"

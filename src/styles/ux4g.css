@@ -391,8 +391,16 @@ img, svg, video {
   }
   
   .ux4g-card, .ux4g-wireframe-card {
-    padding: 20px 16px !important;
+    padding: 18px 14px !important;
     border-radius: 12px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .ux4g-input, select.ux4g-input, textarea.ux4g-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Responsive Fluid Grids & Stacking */
@@ -405,6 +413,7 @@ img, svg, video {
   .ux4g-mobile-grid-1col {
     grid-template-columns: 1fr !important;
   }
+}
 
 /* Responsive Layout Engine for Reporting Flow */
 .ux4g-reporting-grid {
@@ -434,6 +443,15 @@ img, svg, video {
     display: flex !important;
     flex-direction: column !important;
     gap: 12px !important;
+  }
+
+  .ux4g-mobile-btn-wrap {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .ux4g-mobile-btn-wrap button {
+    width: 100% !important;
   }
 }
 
