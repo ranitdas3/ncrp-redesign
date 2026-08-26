@@ -741,7 +741,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               </div>
 
               {/* Primary Action Buttons matching wireframe layout */}
-              <div className="ux4g-btn-grid">
+              <div className="ux4g-btn-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <button
                   type="button"
                   className="ux4g-btn-dark-navy"

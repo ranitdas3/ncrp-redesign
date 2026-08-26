@@ -405,59 +405,6 @@ img, svg, video {
     grid-template-columns: 1fr !important;
   }
 
-  /* Full Width Touch Buttons on Mobile */
-  .ux4g-btn-dark-navy, .ux4g-btn-outline-navy {
-    width: 100% !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    padding: 12px 16px !important;
-    min-height: 48px !important;
-  }
-
-  /* Scrollable Mobile Tabs with Spacing */
-  .ux4g-tabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px;
-    padding-bottom: 4px;
-  }
-
-  .ux4g-tab-btn {
-    white-space: nowrap;
-    padding: 12px 14px !important;
-    min-height: 44px !important;
-  }
-
-  .ux4g-category-card {
-    padding: 14px 16px !important;
-  }
-}
-
-/* 3. Mobile Language Selection Toggle Utility */
-.ux4g-mobile-lang-select {
-  display: none;
-}
-
-@media (max-width: 640px) {
-  .ux4g-desktop-lang-list {
-    display: none !important;
-  }
-  
-  .ux4g-mobile-lang-select {
-    display: block !important;
-    width: 100%;
-    max-width: 200px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1.5px solid #cbd5e1;
-    background-color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #0A3161;
-    min-height: 44px;
-    cursor: pointer;
-  }
 /* Responsive Layout Engine for Reporting Flow */
 .ux4g-reporting-grid {
   display: grid;
@@ -468,8 +415,8 @@ img, svg, video {
 
 .ux4g-btn-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px !important;
 }
 
 @media (max-width: 768px) {
@@ -480,7 +427,7 @@ img, svg, video {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 540px) {
   .ux4g-btn-grid {
     grid-template-columns: 1fr !important;
     display: flex !important;
