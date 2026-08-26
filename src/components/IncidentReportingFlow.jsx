@@ -1238,26 +1238,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       <label className="ux4g-label">
                         Enter Captcha Code <span style={{ color: '#d93025' }}>*</span>
                       </label>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
-                        <div style={{
-                          background: '#0b2e59',
-                          color: '#ffffff',
-                          fontFamily: 'monospace',
-                          fontSize: '1.25rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '4px',
-                          padding: '8px 16px',
-                          borderRadius: '8px',
-                          userSelect: 'none'
-                        }}>
-                          {captchaCode}
-                        </div>
+                      <div className="ux4g-captcha-box">
+                        <div className="ux4g-captcha-code">{captchaCode}</div>
                         <button
                           type="button"
                           onClick={generateCaptcha}
-                          style={{ background: 'none', border: 'none', color: '#0b2e59', fontSize: '1.2rem', cursor: 'pointer' }}
+                          className="ux4g-btn-outline-navy"
+                          style={{ padding: '6px 12px', fontSize: '0.82rem', minHeight: '36px', borderRadius: '6px' }}
                           title="Refresh Captcha">
-                          🔄
+                          🔄 Refresh
                         </button>
                       </div>
                       <input
@@ -1332,26 +1321,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       <label className="ux4g-label">
                         Enter Captcha Code <span style={{ color: '#d93025' }}>*</span>
                       </label>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
-                        <div style={{
-                          background: '#0b2e59',
-                          color: '#ffffff',
-                          fontFamily: 'monospace',
-                          fontSize: '1.25rem',
-                          fontWeight: 'bold',
-                          letterSpacing: '4px',
-                          padding: '8px 16px',
-                          borderRadius: '8px',
-                          userSelect: 'none'
-                        }}>
-                          {captchaCode}
-                        </div>
+                      <div className="ux4g-captcha-box">
+                        <div className="ux4g-captcha-code">{captchaCode}</div>
                         <button
                           type="button"
                           onClick={generateCaptcha}
-                          style={{ background: 'none', border: 'none', color: '#0b2e59', fontSize: '1.2rem', cursor: 'pointer' }}
+                          className="ux4g-btn-outline-navy"
+                          style={{ padding: '6px 12px', fontSize: '0.82rem', minHeight: '36px', borderRadius: '6px' }}
                           title="Refresh Captcha">
-                          🔄
+                          🔄 Refresh
                         </button>
                       </div>
                       <input

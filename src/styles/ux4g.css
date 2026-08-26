@@ -212,23 +212,26 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--ux4g-bg-light);
-  padding: 8px 12px;
-  border: 1px dashed var(--ux4g-border-color);
-  border-radius: var(--ux4g-radius);
+  background: #f8fafc;
+  padding: 10px 14px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 10px;
+  margin-bottom: 12px;
 }
 
 .ux4g-captcha-code {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: 6px;
-  color: var(--ux4g-primary);
-  background: repeating-linear-gradient(45deg, #eee, #eee 10px, #fff 10px, #fff 20px);
-  padding: 6px 14px;
-  border-radius: 4px;
+  letter-spacing: 5px;
+  color: #0A3161;
+  background: repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 10px, #ffffff 10px, #ffffff 20px);
+  padding: 8px 16px;
+  border-radius: 6px;
   user-select: none;
   text-decoration: line-through;
+  border: 1px solid #cbd5e1;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
 }
 
 /* Alerts */
