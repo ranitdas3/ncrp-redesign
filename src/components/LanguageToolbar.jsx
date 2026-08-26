@@ -41,9 +41,10 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
           ))}
         </div>
 
-        {/* Mobile Language Selection Accessible Dropdown (Shown on < 640px Screens) */}
+        {/* Mobile Language Selection Accessible Dropdown (Shown ONLY on Mobile < 640px Screens) */}
         <select
           className="ux4g-mobile-lang-select"
+          style={{ display: 'none' }}
           value={currentLang}
           aria-label="Select Portal Language"
           onChange={(e) => onSelectLang(e.target.value)}>
