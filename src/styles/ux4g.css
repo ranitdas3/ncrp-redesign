@@ -532,5 +532,17 @@ img, svg, video {
     text-align: center !important;
     border-bottom: 1px solid #b91c1c !important;
   }
+/* Responsive Stepper Engine */
+.ux4g-mobile-stepper {
+  display: none;
 }
 
+@media (max-width: 768px) {
+  .ux4g-desktop-stepper {
+    display: none !important;
+  }
+
+  .ux4g-mobile-stepper {
+    display: block !important;
+  }
+}

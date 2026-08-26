@@ -500,6 +500,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   
   const progressPercent = (activeStepNum / stepsList.length) * 100;
   const showSummarySideCard = currentStep !== 4;
+  const currentStepObj = stepsList.find((s) => s.num === activeStepNum) || stepsList[0];
 
   return (
     <div style={{
@@ -533,7 +534,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
       {/* Progressive Disclosure Header (Visible Progress Bar) */}
       <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        
+        {/* DESKTOP STEPPER (4 Horizontal Columns) */}
+        <div className="ux4g-desktop-stepper" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
           {stepsList.map((s) => (
             <div key={s.num} style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: activeStepNum >= s.num ? 1 : 0.4 }}>
               <div style={{
@@ -557,6 +560,48 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           ))}
         </div>
+
+        {/* MOBILE STEPPER (Clean Compact Row for Mobile Screens) */}
+        <div className="ux4g-mobile-stepper" style={{ marginBottom: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0b2e59', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                STEP {activeStepNum} OF {stepsList.length}
+              </div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+                {currentStepObj?.title}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '1px' }}>
+                {currentStepObj?.detail}
+              </div>
+            </div>
+
+            {/* Step Number Circle Badges */}
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              {stepsList.map((s) => (
+                <div
+                  key={s.num}
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: activeStepNum >= s.num ? '#0b2e59' : '#e2e8f0',
+                    color: activeStepNum >= s.num ? '#ffffff' : '#64748b',
+                    fontSize: '0.76rem',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}>
+                  {activeStepNum > s.num ? '✓' : s.num}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Bar Line */}
         <div style={{ background: '#e2e8f0', height: '5px', borderRadius: '3px', overflow: 'hidden' }}>
           <div style={{
             background: '#0b2e59',
