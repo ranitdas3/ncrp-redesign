@@ -636,15 +636,16 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     style={{
                       background: isRecordingVoice ? '#fee2e2' : '#ffffff',
                       border: isRecordingVoice ? '1.5px solid #ef4444' : '1px solid #cbd5e1',
-                      borderRadius: '16px',
-                      padding: '8px 20px',
-                      fontSize: '0.88rem',
+                      borderRadius: '20px',
+                      padding: '6px 14px',
+                      fontSize: '0.84rem',
+                      minHeight: '32px',
                       fontWeight: 600,
                       color: isRecordingVoice ? '#b91c1c' : '#1e293b',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '8px'
+                      gap: '6px'
                     }}
                     className={isRecordingVoice ? 'ux4g-voice-pulse' : ''}>
                     🎙️ {isRecordingVoice ? `Recording... (${voiceTimer}s)` : 'Speak Complaint'}
@@ -657,15 +658,16 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     style={{
                       background: '#ffffff',
                       border: '1px solid #cbd5e1',
-                      borderRadius: '16px',
-                      padding: '8px 20px',
-                      fontSize: '0.88rem',
+                      borderRadius: '20px',
+                      padding: '6px 14px',
+                      fontSize: '0.84rem',
+                      minHeight: '32px',
                       fontWeight: 600,
                       color: '#1e293b',
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '8px'
+                      gap: '6px'
                     }}>
                     {isAnalyzing ? 'Scanning Evidence...' : `${getActionBtnLabel()} ▾`}
                   </button>
@@ -674,7 +676,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   {showEvidenceMenu && (
                     <div style={{
                       position: 'absolute',
-                      top: '46px',
+                      top: '38px',
                       left: '180px',
                       zIndex: 10,
                       background: '#ffffff',
