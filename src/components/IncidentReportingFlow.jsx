@@ -29,13 +29,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     suspectDetails: '',
     platform: '',
     contentType: '',
-    incidentLocation: 'New Delhi, India (Captured via Network IP)',
+    incidentLocation: '',
     suspectIpEmail: '',
     witnessContact: '',
 
-    financialLoss: category?.id === 'financial' ? '32500' : '',
-    transactionRef: category?.id === 'financial' ? '429184029102' : '',
-    victimBank: 'State Bank of India',
+    financialLoss: '',
+    transactionRef: '',
+    victimBank: '',
     targetSystem: '',
     phishingUrl: '',
     compromisedIdentity: '',
@@ -43,7 +43,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
   // CITIZEN LOGIN / AUTHENTICATION STEP STATE
   const [loginTab, setLoginTab] = useState('otp'); // 'otp' or 'password'
-  const [citizenMobile, setCitizenMobile] = useState('9876543210');
+  const [citizenMobile, setCitizenMobile] = useState('');
   const [citizenUserId, setCitizenUserId] = useState('');
   const [citizenPassword, setCitizenPassword] = useState('');
   const [otpSent, setOtpSent] = useState(false);
