@@ -434,9 +434,11 @@ img, svg, video {
     flex-direction: column !important;
     gap: 12px !important;
   }
+}
+
 /* Mobile Language Selection Toggle Utility */
 .ux4g-mobile-lang-select {
-  display: none;
+  display: none !important;
 }
 
 @media (max-width: 640px) {
