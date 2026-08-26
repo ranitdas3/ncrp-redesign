@@ -55,72 +55,80 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
           ))}
         </select>
 
-        {/* Text Sizing Controls (Sits directly to the right of language dropdown on mobile) */}
+        {/* Text Sizing Segmented Controller */}
         <div className="ux4g-text-size-box" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
           <span className="ux4g-text-size-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Text Size:</span>
-          <button 
-            type="button"
-            className="ux4g-text-size-btn"
-            aria-label="Small font size"
-            onClick={() => setFontSize('sm')} 
-            style={{ 
-              background: fontSize === 'sm' ? '#0A3161' : '#ffffff', 
-              color: fontSize === 'sm' ? '#ffffff' : '#0f172a', 
-              border: '1.5px solid #94a3b8', 
-              borderRadius: '6px', 
-              minWidth: '38px',
-              minHeight: '36px',
-              padding: '4px 8px', 
-              cursor: 'pointer', 
-              fontWeight: 'bold',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            A-
-          </button>
-          <button 
-            type="button"
-            className="ux4g-text-size-btn"
-            aria-label="Default font size"
-            onClick={() => setFontSize('md')} 
-            style={{ 
-              background: fontSize === 'md' ? '#0A3161' : '#ffffff', 
-              color: fontSize === 'md' ? '#ffffff' : '#0f172a', 
-              border: '1.5px solid #94a3b8', 
-              borderRadius: '6px', 
-              minWidth: '38px',
-              minHeight: '36px',
-              padding: '4px 8px', 
-              cursor: 'pointer', 
-              fontWeight: 'bold',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            A
-          </button>
-          <button 
-            type="button"
-            className="ux4g-text-size-btn"
-            aria-label="Large font size"
-            onClick={() => setFontSize('lg')} 
-            style={{ 
-              background: fontSize === 'lg' ? '#0A3161' : '#ffffff', 
-              color: fontSize === 'lg' ? '#ffffff' : '#0f172a', 
-              border: '1.5px solid #94a3b8', 
-              borderRadius: '6px', 
-              minWidth: '38px',
-              minHeight: '36px',
-              padding: '4px 8px', 
-              cursor: 'pointer', 
-              fontWeight: 'bold',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-            A+
-          </button>
+          <div className="ux4g-text-size-segmented" style={{ display: 'inline-flex', background: '#cbd5e1', padding: '2px', borderRadius: '8px', gap: '2px' }}>
+            <button 
+              type="button"
+              className="ux4g-text-size-btn"
+              aria-label="Small font size"
+              onClick={() => setFontSize('sm')} 
+              style={{ 
+                background: fontSize === 'sm' ? '#0A3161' : 'transparent', 
+                color: fontSize === 'sm' ? '#ffffff' : '#334155', 
+                border: 'none', 
+                borderRadius: '6px', 
+                minWidth: '34px',
+                height: '32px',
+                padding: '0 8px', 
+                cursor: 'pointer', 
+                fontWeight: 'bold',
+                fontSize: '0.82rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease'
+              }}>
+              A-
+            </button>
+            <button 
+              type="button"
+              className="ux4g-text-size-btn"
+              aria-label="Default font size"
+              onClick={() => setFontSize('md')} 
+              style={{ 
+                background: fontSize === 'md' ? '#0A3161' : 'transparent', 
+                color: fontSize === 'md' ? '#ffffff' : '#334155', 
+                border: 'none', 
+                borderRadius: '6px', 
+                minWidth: '34px',
+                height: '32px',
+                padding: '0 8px', 
+                cursor: 'pointer', 
+                fontWeight: 'bold',
+                fontSize: '0.82rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease'
+              }}>
+              A
+            </button>
+            <button 
+              type="button"
+              className="ux4g-text-size-btn"
+              aria-label="Large font size"
+              onClick={() => setFontSize('lg')} 
+              style={{ 
+                background: fontSize === 'lg' ? '#0A3161' : 'transparent', 
+                color: fontSize === 'lg' ? '#ffffff' : '#334155', 
+                border: 'none', 
+                borderRadius: '6px', 
+                minWidth: '34px',
+                height: '32px',
+                padding: '0 8px', 
+                cursor: 'pointer', 
+                fontWeight: 'bold',
+                fontSize: '0.82rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s ease'
+              }}>
+              A+
+            </button>
+          </div>
         </div>
 
       </div>
