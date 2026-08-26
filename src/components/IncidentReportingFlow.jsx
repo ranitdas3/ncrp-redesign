@@ -1418,12 +1418,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 </div>
 
                 {/* Clean Action Buttons */}
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="ux4g-mobile-btn-wrap" style={{ display: 'flex', gap: '12px' }}>
                   <button
                     type="button"
                     className="ux4g-btn ux4g-btn-secondary"
                     onClick={() => setCurrentStep(2)}>
-                    ← Back to Incident Details
+                    ← Back
                   </button>
 
                   <button
@@ -1433,7 +1433,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     disabled={isSubmitting || !isDeclarationAccepted}>
                     {isSubmitting
                       ? 'Authenticating & Registering...'
-                      : 'Verify & Register Official Cyber Crime Complaint →'}
+                      : 'Verify & Register Complaint →'}
                   </button>
                 </div>
 
