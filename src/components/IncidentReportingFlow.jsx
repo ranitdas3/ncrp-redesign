@@ -566,7 +566,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       </div>
 
       {/* Main Grid Wrapper */}
-      <div style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
+      <div className={showSummarySideCard ? 'ux4g-reporting-grid' : ''}>
         
         {/* Left Form Area */}
         <div>
@@ -739,7 +739,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               </div>
 
               {/* Primary Action Buttons matching wireframe layout */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="ux4g-btn-grid">
                 <button
                   type="button"
                   className="ux4g-btn-dark-navy"
