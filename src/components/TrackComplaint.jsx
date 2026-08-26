@@ -36,11 +36,11 @@ export default function TrackComplaint() {
     setSuccessMessage('');
 
     if (!ackNo.trim()) {
-      setErrorMessage('Please enter your Acknowledgement No.');
+      setErrorMessage('It looks like the Acknowledgement Number field is empty. Please enter your complaint tracking number.');
       return;
     }
     if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-      setErrorMessage('Invalid Captcha code. Please re-enter Captcha.');
+      setErrorMessage('The captcha code doesn\'t match the image shown. A new code has been generated for you.');
       generateCaptcha();
       return;
     }
@@ -56,7 +56,7 @@ export default function TrackComplaint() {
     setSuccessMessage('');
 
     if (!otpInput || otpInput.length !== 6) {
-      setErrorMessage('Please enter the 6-digit OTP code.');
+      setErrorMessage('It looks like the OTP code is incomplete. Please enter the 6-digit verification code sent to your mobile.');
       return;
     }
 

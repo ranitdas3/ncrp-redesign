@@ -14,7 +14,7 @@ export default function CategorySelection({ currentLang, onSelectCategory }) {
         <p style={{ fontSize: '1rem', color: '#475569', margin: 0, lineHeight: 1.4 }}>
           {currentLang === 'hi'
             ? 'हमें बताएं कि क्या हुआ। हम रिपोर्ट करने के लिए आवश्यक जानकारी में आपका मार्गदर्शन करेंगे।'
-            : 'Tell us what happened. We will guide you though the information needed to report it.'}
+            : 'Tell us what happened. We will guide you through the information needed to report it.'}
         </p>
       </div>
 

@@ -51,12 +51,12 @@ export default function LoginForm({ language }) {
     e.preventDefault();
     setErrorMessage('');
     if (!mobileNumber || mobileNumber.length !== 10 || !/^\d+$/.test(mobileNumber)) {
-      setErrorMessage(language === 'hi' ? 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।' : 'Please enter a valid 10-digit mobile number.');
+      setErrorMessage(language === 'hi' ? 'मोबाइल नंबर 10 अंकों का होना चाहिए। कृपया पुनः जाँचें।' : 'It looks like the mobile number needs to be 10 digits. Please check and re-enter.');
       return;
     }
 
     if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-      setErrorMessage(language === 'hi' ? 'अमान्य कैप्चा कोड। कृपया पुनः प्रयास करें।' : 'Invalid Captcha code. Please try again.');
+      setErrorMessage(language === 'hi' ? 'कैप्चा कोड मेल नहीं खा रहा है। कृपया नया कोड दर्ज करें।' : 'The captcha code doesn\'t match the image shown. A new code has been generated for you.');
       generateCaptcha();
       return;
     }
@@ -75,24 +75,24 @@ export default function LoginForm({ language }) {
 
     if (activeTab === 'otp') {
       if (!otpSent) {
-        setErrorMessage(language === 'hi' ? 'कृपया पहले ओटीपी प्राप्त करें।' : 'Please request OTP first.');
+        setErrorMessage(language === 'hi' ? 'आगे बढ़ने से पहले कृपया ओटीपी प्राप्त करें।' : 'Please request an OTP verification code first before proceeding.');
         return;
       }
       if (!otpInput || otpInput.length !== 6) {
-        setErrorMessage(language === 'hi' ? 'कृपया 6 अंकों का ओटीपी दर्ज करें।' : 'Please enter the 6-digit OTP.');
+        setErrorMessage(language === 'hi' ? 'कृपया मोबाइल पर प्राप्त 6-अंकों का ओटीपी दर्ज करें।' : 'It looks like the OTP code is incomplete. Please enter the 6-digit verification code sent to your mobile.');
         return;
       }
     } else {
       if (!userId.trim()) {
-        setErrorMessage(language === 'hi' ? 'कृपया अपना यूजर आई डी दर्ज करें।' : 'Please enter your User ID.');
+        setErrorMessage(language === 'hi' ? 'कृपया अपना यूजर आई डी दर्ज करें।' : 'It looks like the User ID field is empty. Please enter your User ID or Email ID.');
         return;
       }
       if (!password) {
-        setErrorMessage(language === 'hi' ? 'कृपया पासवर्ड दर्ज करें।' : 'Please enter your Password.');
+        setErrorMessage(language === 'hi' ? 'कृपया अपना पासवर्ड दर्ज करें।' : 'It looks like the password field is empty. Please enter your password to continue.');
         return;
       }
       if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-        setErrorMessage(language === 'hi' ? 'अमान्य कैप्चा कोड।' : 'Invalid Captcha code. Please try again.');
+        setErrorMessage(language === 'hi' ? 'कैप्चा कोड मेल नहीं खा रहा है। कृपया नया कोड दर्ज करें।' : 'The captcha code doesn\'t match the image shown. A new code has been generated for you.');
         generateCaptcha();
         return;
       }

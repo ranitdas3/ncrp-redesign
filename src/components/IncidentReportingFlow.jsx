@@ -94,12 +94,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     if (e) e.preventDefault();
     setAuthError('');
     if (!citizenMobile || citizenMobile.length !== 10 || !/^\d+$/.test(citizenMobile)) {
-      setAuthError('Please enter a valid 10-digit mobile number.');
+      setAuthError('It looks like the mobile number needs to be 10 digits. Please check and re-enter.');
       return;
     }
 
     if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-      setAuthError('Invalid Captcha code. Please re-enter Captcha.');
+      setAuthError('The captcha code doesn\'t match the image shown. A new code has been generated for you.');
       generateCaptcha();
       return;
     }
@@ -262,31 +262,31 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
     if (loginTab === 'otp') {
       if (!otpSent) {
-        setAuthError('Please click "Get OTP" to request your verification code.');
+        setAuthError('Please request your OTP verification code first before proceeding.');
         return;
       }
       if (!otpInput || otpInput.length !== 6) {
-        setAuthError('Please enter the 6-digit OTP.');
+        setAuthError('It looks like the OTP code is incomplete. Please enter the 6-digit verification code sent to your mobile.');
         return;
       }
     } else {
       if (!citizenUserId.trim()) {
-        setAuthError('Please enter your Citizen User ID.');
+        setAuthError('It looks like the User ID field is empty. Please enter your User ID or Email ID.');
         return;
       }
       if (!citizenPassword) {
-        setAuthError('Please enter your Password.');
+        setAuthError('It looks like the password field is empty. Please enter your password to continue.');
         return;
       }
       if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-        setAuthError('Invalid Captcha code. Please re-enter Captcha.');
+        setAuthError('The captcha code doesn\'t match the image shown. A new code has been generated for you.');
         generateCaptcha();
         return;
       }
     }
 
     if (!isDeclarationAccepted) {
-      setAuthError('Please check the terms and policy declaration box to proceed.');
+      setAuthError('Please review and check the declaration box before submitting.');
       return;
     }
 
@@ -597,7 +597,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               {/* Sub-Category Selector Pills with Red Star */}
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
-                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> SELECT THE SPECIFIC TYPE OF INCIDENT THAT OCCURED
+                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Select the type of incident that occurred
                 </label>
                 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -619,7 +619,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
               {/* Description Section with Red Star + Fast Intake Buttons */}
               <div style={{ marginTop: '32px', marginBottom: '16px', position: 'relative' }}>
                 <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
-                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> GIVE DESCRIPTION OF THE INCIDENT
+                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Describe what happened
                 </label>
 
                 {/* Fast Input Action Buttons */}
@@ -725,7 +725,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 <textarea
                   className="ux4g-input"
                   rows={5}
-                  placeholder="Describe what Happened (e.g date/time step by step)"
+                  placeholder="Describe what happened (e.g. key events, approximate dates/times, or any details you recall). An estimate is fine if you're not sure of exact dates."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   style={{
@@ -794,7 +794,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Date & Time
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> When did this happen? (An estimate is fine)
                         </label>
                         <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
                       </div>
