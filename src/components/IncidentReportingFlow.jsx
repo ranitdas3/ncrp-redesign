@@ -314,7 +314,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       display: 'flex',
       flexDirection: 'column',
       position: 'sticky',
-      top: '20px'
+      top: '20px',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       {/* Case Summary Header */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#fafafa' }}>
@@ -568,7 +570,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       {/* Main Grid Wrapper (Desktop 2-column layout with Summary Card on the right) */}
       <div 
         className={showSummarySideCard ? 'ux4g-reporting-grid' : ''}
-        style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
+        style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: '24px', alignItems: 'start' } : {}}>
         
         {/* Left Form Area */}
         <div>
