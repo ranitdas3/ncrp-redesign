@@ -265,15 +265,17 @@ body {
 .ux4g-pill-chip {
   background: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 16px;
-  padding: 10px 20px;
-  font-size: 0.88rem;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
   font-weight: 500;
   color: #1e293b;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  min-height: 32px;
+  line-height: 1.2;
 }
 
 .ux4g-pill-chip:hover {
@@ -360,7 +362,6 @@ input[type="button"],
 input[type="submit"],
 select,
 .ux4g-btn,
-.ux4g-pill-chip,
 .ux4g-tab-btn,
 .ux4g-touch-target {
   min-height: 44px;
