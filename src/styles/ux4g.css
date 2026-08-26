@@ -472,7 +472,7 @@ img, svg, video {
   gap: 16px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .ux4g-reporting-grid {
     grid-template-columns: 1fr !important;
     display: flex !important;

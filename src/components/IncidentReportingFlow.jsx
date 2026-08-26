@@ -565,8 +565,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       </div>
 
-      {/* Main Grid Wrapper */}
-      <div className={showSummarySideCard ? 'ux4g-reporting-grid' : ''}>
+      {/* Main Grid Wrapper (Desktop 2-column layout with Summary Card on the right) */}
+      <div 
+        className={showSummarySideCard ? 'ux4g-reporting-grid' : ''}
+        style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
         
         {/* Left Form Area */}
         <div>
