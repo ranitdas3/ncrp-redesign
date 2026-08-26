@@ -436,7 +436,7 @@ img, svg, video {
   }
 }
 
-/* Mobile Language Selection Toggle Utility */
+/* Mobile Language Selection & Text Sizing Toolbar Utility */
 .ux4g-mobile-lang-select {
   display: none !important;
 }
@@ -446,18 +446,90 @@ img, svg, video {
     display: none !important;
   }
   
+  .ux4g-mobile-toolbar-row {
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    gap: 6px !important;
+  }
+
   .ux4g-mobile-lang-select {
     display: block !important;
-    width: 100%;
-    max-width: 200px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1.5px solid #cbd5e1;
-    background-color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #0A3161;
-    min-height: 44px;
-    cursor: pointer;
+    width: auto !important;
+    max-width: 145px !important;
+    padding: 6px 8px !important;
+    font-size: 0.82rem !important;
+    min-height: 38px !important;
+    border-radius: 6px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+    font-weight: 600 !important;
+    color: #0A3161 !important;
+  }
+
+  .ux4g-text-size-label {
+    display: none !important;
+  }
+
+  .ux4g-text-size-btn {
+    min-width: 32px !important;
+    min-height: 36px !important;
+    padding: 2px 6px !important;
+    font-size: 0.8rem !important;
   }
 }
+
+/* Tighter Mobile Portal Navigation Tabs (No Horizontal Scroll) */
+.ux4g-main-nav-container {
+  display: flex;
+  gap: 20px;
+  padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .ux4g-main-nav-container {
+    gap: 4px !important;
+    padding: 0 4px !important;
+    justify-content: space-between !important;
+    overflow-x: hidden !important;
+  }
+
+  .ux4g-main-nav-btn {
+    flex: 1 !important;
+    padding: 10px 4px !important;
+    font-size: 0.82rem !important;
+    text-align: center !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+  }
+}
+
+/* Mobile Emergency Helpline Top Banner */
+.ux4g-mobile-helpline-banner {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .ux4g-desktop-helpline {
+    display: none !important;
+  }
+
+  .ux4g-mobile-helpline-banner {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    background: #d93025 !important;
+    color: #ffffff !important;
+    padding: 8px 10px !important;
+    font-size: 0.84rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border-bottom: 1px solid #b91c1c !important;
+  }
+}
+

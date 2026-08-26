@@ -16,7 +16,7 @@ const LANGUAGES = [
 export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, setFontSize }) {
   return (
     <div style={{ backgroundColor: '#e2e8f0', borderBottom: '1px solid #cbd5e1', padding: '6px 0', fontSize: '0.85rem' }}>
-      <div className="ux4g-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+      <div className="ux4g-container ux4g-mobile-toolbar-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
         
         {/* Desktop Language Selection List */}
         <div className="ux4g-desktop-lang-list" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -55,11 +55,12 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
           ))}
         </select>
 
-        {/* Text Sizing Controls with 44px Minimum Touch Target */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#334155' }}>
-          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Text Size:</span>
+        {/* Text Sizing Controls (Sits directly to the right of language dropdown on mobile) */}
+        <div className="ux4g-text-size-box" style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
+          <span className="ux4g-text-size-label" style={{ fontWeight: 600, fontSize: '0.85rem' }}>Text Size:</span>
           <button 
             type="button"
+            className="ux4g-text-size-btn"
             aria-label="Small font size"
             onClick={() => setFontSize('sm')} 
             style={{ 
@@ -67,9 +68,9 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
               color: fontSize === 'sm' ? '#ffffff' : '#0f172a', 
               border: '1.5px solid #94a3b8', 
               borderRadius: '6px', 
-              minWidth: '40px',
-              minHeight: '38px',
-              padding: '4px 10px', 
+              minWidth: '38px',
+              minHeight: '36px',
+              padding: '4px 8px', 
               cursor: 'pointer', 
               fontWeight: 'bold',
               display: 'inline-flex',
@@ -80,6 +81,7 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
           </button>
           <button 
             type="button"
+            className="ux4g-text-size-btn"
             aria-label="Default font size"
             onClick={() => setFontSize('md')} 
             style={{ 
@@ -87,9 +89,9 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
               color: fontSize === 'md' ? '#ffffff' : '#0f172a', 
               border: '1.5px solid #94a3b8', 
               borderRadius: '6px', 
-              minWidth: '40px',
-              minHeight: '38px',
-              padding: '4px 10px', 
+              minWidth: '38px',
+              minHeight: '36px',
+              padding: '4px 8px', 
               cursor: 'pointer', 
               fontWeight: 'bold',
               display: 'inline-flex',
@@ -100,6 +102,7 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
           </button>
           <button 
             type="button"
+            className="ux4g-text-size-btn"
             aria-label="Large font size"
             onClick={() => setFontSize('lg')} 
             style={{ 
@@ -107,9 +110,9 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
               color: fontSize === 'lg' ? '#ffffff' : '#0f172a', 
               border: '1.5px solid #94a3b8', 
               borderRadius: '6px', 
-              minWidth: '40px',
-              minHeight: '38px',
-              padding: '4px 10px', 
+              minWidth: '38px',
+              minHeight: '36px',
+              padding: '4px 8px', 
               cursor: 'pointer', 
               fontWeight: 'bold',
               display: 'inline-flex',

@@ -29,8 +29,8 @@ export default function GovtHeader({ fontSize, setFontSize, isHighContrast, setI
           </div>
         </div>
 
-        {/* Cyber Crime Helpline Pill */}
-        <a href="tel:1930" style={{ textDecoration: 'none', color: 'inherit' }}>
+        {/* Cyber Crime Helpline Pill (Desktop) */}
+        <a href="tel:1930" className="ux4g-desktop-helpline" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fce8e6', border: '1px solid #f5c6cb', padding: '8px 16px', borderRadius: '30px', minHeight: '44px' }}>
             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d93025', animation: 'pulse 1.5s infinite' }} />
             <div>

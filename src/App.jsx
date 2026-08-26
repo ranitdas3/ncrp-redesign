@@ -44,13 +44,34 @@ export default function App() {
         setLanguage={setCurrentLang}
       />
 
-      {/* Portal Navigation Ribbon with 3 Tabs */}
+      {/* Attached Mobile National Helpline Banner (Shown directly on top of navigation tabs on mobile) */}
+      <a 
+        href="tel:1930" 
+        className="ux4g-mobile-helpline-banner" 
+        style={{ textDecoration: 'none' }}>
+        <span>
+          {currentLang === 'hi' ? '🚨 राष्ट्रीय साइबर हेल्पलाइन:' :
+           currentLang === 'bn' ? '🚨 জাতীয় সাইবার হেল্পলাইন:' :
+           currentLang === 'gu' ? '🚨 રાષ્ટ્રીય સાયબર હેલ્પલાઇન:' :
+           currentLang === 'mr' ? '🚨 राष्ट्रीय सायबर हेल्पलाइन:' :
+           currentLang === 'kn' ? '🚨 ರಾಷ್ಟ್ರೀಯ ಸೈಬರ್ ಹೆಲ್ಪ್‌ಲೈನ್:' :
+           currentLang === 'ml' ? '🚨 ദേശീയ സൈബർ ഹെൽപ്‌ലൈൻ:' :
+           currentLang === 'ta' ? '🚨 தேசிய சைபர் உதவி எண்:' :
+           currentLang === 'te' ? '🚨 జాతీయ సైబర్ హెల్ప్‌లైన్:' :
+           currentLang === 'or' ? '🚨 ଜାତୀୟ ସାଇବର୍ ହେଲ୍ପଲାଇନ୍:' :
+           '🚨 National Cyber Helpline:'}
+        </span>
+        <span style={{ textDecoration: 'underline', fontWeight: 800 }}>📞 1930</span>
+      </a>
+
+      {/* Portal Navigation Ribbon with 2 Tabs (Tighter layout for mobile screens) */}
       <nav style={{ background: '#0A3161', borderBottom: '1px solid #08264d' }}>
-        <div className="ux4g-container" style={{ display: 'flex', gap: '20px', padding: '0 16px', overflowX: 'auto' }}>
+        <div className="ux4g-container ux4g-main-nav-container">
           
           {/* TAB 1: Report A Cyber Crime */}
           <button
             type="button"
+            className="ux4g-main-nav-btn"
             onClick={() => setCurrentView('categories')}
             style={{
               background: 'none',
@@ -63,12 +84,13 @@ export default function App() {
               whiteSpace: 'nowrap',
               borderBottom: currentView === 'categories' || currentView === 'wizard' ? '3px solid #FF9933' : '3px solid transparent'
             }}>
-            🚨 {currentLang === 'hi' ? 'साइबर अपराध रिपोर्ट करें' : 'Report A Cyber Crime'}
+            🚨 {currentLang === 'hi' ? 'साइबर अपराध रिपोर्ट करें' : 'Report Cyber Crime'}
           </button>
 
           {/* TAB 2: Track your Complaint */}
           <button
             type="button"
+            className="ux4g-main-nav-btn"
             onClick={() => setCurrentView('track')}
             style={{
               background: 'none',
@@ -81,7 +103,7 @@ export default function App() {
               whiteSpace: 'nowrap',
               borderBottom: currentView === 'track' ? '3px solid #FF9933' : '3px solid transparent'
             }}>
-            🔍 {currentLang === 'hi' ? 'शिकायत की स्थिति ट्रैक करें' : 'Track your Complaint'}
+            🔍 {currentLang === 'hi' ? 'शिकायत ट्रैक करें' : 'Track Complaint'}
           </button>
 
         </div>
