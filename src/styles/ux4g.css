@@ -577,4 +577,35 @@ img, svg, video {
   .ux4g-mobile-stepper {
     display: block !important;
   }
+/* Mobile Typography Optimization for Category Selection Dashboard */
+@media (max-width: 768px) {
+  .ux4g-main-title {
+    font-size: 1.35rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  .ux4g-main-subtitle {
+    font-size: 0.86rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .ux4g-category-card {
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  .ux4g-category-icon-box {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+  }
+
+  .ux4g-category-title {
+    font-size: 0.98rem !important;
+    margin-bottom: 1px !important;
+  }
+
+  .ux4g-category-subtext {
+    font-size: 0.8rem !important;
+  }
 }
