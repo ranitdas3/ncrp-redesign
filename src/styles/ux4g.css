@@ -434,6 +434,28 @@ img, svg, video {
     flex-direction: column !important;
     gap: 12px !important;
   }
+/* Mobile Language Selection Toggle Utility */
+.ux4g-mobile-lang-select {
+  display: none;
 }
 
-
+@media (max-width: 640px) {
+  .ux4g-desktop-lang-list {
+    display: none !important;
+  }
+  
+  .ux4g-mobile-lang-select {
+    display: block !important;
+    width: 100%;
+    max-width: 200px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0A3161;
+    min-height: 44px;
+    cursor: pointer;
+  }
+}
