@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const LANGUAGES = [
   { code: 'en', name: 'English' },
@@ -13,18 +14,21 @@ const LANGUAGES = [
   { code: 'or', name: 'ଓଡ଼ିଆ' },
 ];
 
-export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, setFontSize }) {
+export default function LanguageToolbar({ fontSize, setFontSize }) {
+  const { i18n, t } = useTranslation();
+  const currentLang = i18n.language;
+
   return (
     <div style={{ backgroundColor: '#e2e8f0', borderBottom: '1px solid #cbd5e1', padding: '6px 0', fontSize: '0.85rem' }}>
       <div className="ux4g-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-        
-        {/* Language Selection List as shown in Wireframe */}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               type="button"
-              onClick={() => onSelectLang(lang.code)}
+              onClick={() => i18n.changeLanguage(lang.code)}
+              aria-label={`Switch to ${lang.name}`}
               style={{
                 background: 'none',
                 border: 'none',
@@ -40,26 +44,25 @@ export default function LanguageToolbar({ currentLang, onSelectLang, fontSize, s
           ))}
         </div>
 
-        {/* Text Sizing Controls matching Wireframe */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#334155' }}>
-          <span style={{ fontWeight: 500 }}>Text Size:</span>
-          <button 
+          <span style={{ fontWeight: 500 }}>{t('accessibility.textSize')}</span>
+          <button
             type="button"
-            onClick={() => setFontSize('sm')} 
+            onClick={() => setFontSize('sm')}
             style={{ background: fontSize === 'sm' ? '#0A3161' : 'transparent', color: fontSize === 'sm' ? '#fff' : '#0f172a', border: '1px solid #94a3b8', borderRadius: '3px', padding: '1px 6px', cursor: 'pointer', fontWeight: 'bold' }}>
-            A-
+            {t('accessibility.smallText')}
           </button>
-          <button 
+          <button
             type="button"
-            onClick={() => setFontSize('md')} 
+            onClick={() => setFontSize('md')}
             style={{ background: fontSize === 'md' ? '#0A3161' : 'transparent', color: fontSize === 'md' ? '#fff' : '#0f172a', border: '1px solid #94a3b8', borderRadius: '3px', padding: '1px 6px', cursor: 'pointer', fontWeight: 'bold' }}>
-            A
+            {t('accessibility.mediumText')}
           </button>
-          <button 
+          <button
             type="button"
-            onClick={() => setFontSize('lg')} 
+            onClick={() => setFontSize('lg')}
             style={{ background: fontSize === 'lg' ? '#0A3161' : 'transparent', color: fontSize === 'lg' ? '#fff' : '#0f172a', border: '1px solid #94a3b8', borderRadius: '3px', padding: '1px 6px', cursor: 'pointer', fontWeight: 'bold' }}>
-            A+
+            {t('accessibility.largeText')}
           </button>
         </div>
 

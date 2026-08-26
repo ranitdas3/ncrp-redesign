@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './styles/ux4g.css';
 import LanguageToolbar from './components/LanguageToolbar';
 import GovtHeader from './components/GovtHeader';
@@ -9,15 +10,13 @@ import TrackComplaint from './components/TrackComplaint';
 import GovtFooter from './components/GovtFooter';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('categories'); // 'categories', 'wizard', 'login', 'track'
+  const { t } = useTranslation();
+  const [currentView, setCurrentView] = useState('categories');
   const [selectedCategory, setSelectedCategory] = useState(null);
-  
-  // Accessibility & Localization State
-  const [fontSize, setFontSize] = useState('md'); // 'sm', 'md', 'lg'
-  const [isHighContrast, setIsHighContrast] = useState(false);
-  const [currentLang, setCurrentLang] = useState('en'); // 'en', 'hi', 'bn', etc.
 
-  // Handle Category Selection from Dashboard Card
+  const [fontSize, setFontSize] = useState('md');
+  const [isHighContrast, setIsHighContrast] = useState(false);
+
   const handleSelectCategory = (category) => {
     setSelectedCategory(category);
     setCurrentView('wizard');
@@ -25,30 +24,17 @@ export default function App() {
 
   return (
     <div className={`ux4g-font-${fontSize} ${isHighContrast ? 'ux4g-theme-high-contrast' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      
-      {/* Top Multi-Language & Accessibility Toolbar matching Low-fi Wireframe */}
+
       <LanguageToolbar
-        currentLang={currentLang}
-        onSelectLang={setCurrentLang}
         fontSize={fontSize}
         setFontSize={setFontSize}
       />
 
-      {/* Main Government Header */}
-      <GovtHeader
-        fontSize={fontSize}
-        setFontSize={setFontSize}
-        isHighContrast={isHighContrast}
-        setIsHighContrast={setIsHighContrast}
-        language={currentLang}
-        setLanguage={setCurrentLang}
-      />
+      <GovtHeader />
 
-      {/* Portal Navigation Ribbon with 3 Tabs */}
       <nav style={{ background: '#0A3161', borderBottom: '1px solid #08264d' }}>
         <div className="ux4g-container" style={{ display: 'flex', gap: '20px', padding: '0 16px', overflowX: 'auto' }}>
-          
-          {/* TAB 1: Report A Cyber Crime */}
+
           <button
             type="button"
             onClick={() => setCurrentView('categories')}
@@ -63,10 +49,9 @@ export default function App() {
               whiteSpace: 'nowrap',
               borderBottom: currentView === 'categories' || currentView === 'wizard' ? '3px solid #FF9933' : '3px solid transparent'
             }}>
-            🚨 {currentLang === 'hi' ? 'साइबर अपराध रिपोर्ट करें' : 'Report A Cyber Crime'}
+            🚨 {t('navigation.reportCyberCrime')}
           </button>
 
-          {/* TAB 2: Track your Complaint */}
           <button
             type="button"
             onClick={() => setCurrentView('track')}
@@ -81,17 +66,15 @@ export default function App() {
               whiteSpace: 'nowrap',
               borderBottom: currentView === 'track' ? '3px solid #FF9933' : '3px solid transparent'
             }}>
-            🔍 {currentLang === 'hi' ? 'शिकायत की स्थिति ट्रैक करें' : 'Track your Complaint'}
+            🔍 {t('navigation.trackComplaint')}
           </button>
 
         </div>
       </nav>
 
-      {/* View Router */}
       <main style={{ flex: 1 }}>
         {currentView === 'categories' && (
           <CategorySelection
-            currentLang={currentLang}
             onSelectCategory={handleSelectCategory}
           />
         )}
@@ -99,22 +82,20 @@ export default function App() {
         {currentView === 'wizard' && selectedCategory && (
           <IncidentReportingFlow
             category={selectedCategory}
-            currentLang={currentLang}
             onBackToCategories={() => setCurrentView('categories')}
           />
         )}
 
         {currentView === 'login' && (
-          <LoginForm language={currentLang} />
+          <LoginForm />
         )}
 
         {currentView === 'track' && (
-          <TrackComplaint currentLang={currentLang} />
+          <TrackComplaint />
         )}
       </main>
 
-      {/* Government Footer */}
-      <GovtFooter language={currentLang} />
+      <GovtFooter />
 
     </div>
   );

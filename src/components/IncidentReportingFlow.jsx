@@ -1,29 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import CategoryIcon from './CategoryIcon';
 
-export default function IncidentReportingFlow({ category, currentLang, onBackToCategories, isLoggedIn: initialIsLoggedIn = false }) {
-  // Session Login State (Controllable via prop or interactive simulation toggle)
+export default function IncidentReportingFlow({ category, onBackToCategories, isLoggedIn: initialIsLoggedIn = false }) {
+  const { t } = useTranslation();
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [detailsPage, setDetailsPage] = useState(1);
 
-  // Sub-Crime Selection State
   const [selectedSubCrime, setSelectedSubCrime] = useState(null);
 
-  // Intake State
   const [description, setDescription] = useState('');
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [voiceTimer, setVoiceTimer] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Evidence Options Menu Popover State
   const [showEvidenceMenu, setShowEvidenceMenu] = useState(false);
 
-  // Evidence files list attached to the case
   const [attachedFiles, setAttachedFiles] = useState([]);
 
-  // Dynamic Category-Specific Incident Details Fields
   const [incidentFields, setIncidentFields] = useState({
     incidentDate: new Date().toISOString().slice(0, 16),
     suspectDetails: '',
@@ -32,7 +28,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     incidentLocation: 'New Delhi, India (Captured via Network IP)',
     suspectIpEmail: '',
     witnessContact: '',
-
     financialLoss: category?.id === 'financial' ? '32500' : '',
     transactionRef: category?.id === 'financial' ? '429184029102' : '',
     victimBank: 'State Bank of India',
@@ -41,8 +36,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     compromisedIdentity: '',
   });
 
-  // CITIZEN LOGIN / AUTHENTICATION STEP STATE
-  const [loginTab, setLoginTab] = useState('otp'); // 'otp' or 'password'
+  const [loginTab, setLoginTab] = useState('otp');
   const [citizenMobile, setCitizenMobile] = useState('9876543210');
   const [citizenUserId, setCitizenUserId] = useState('');
   const [citizenPassword, setCitizenPassword] = useState('');
@@ -54,16 +48,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const [authError, setAuthError] = useState('');
   const [isDeclarationAccepted, setIsDeclarationAccepted] = useState(false);
 
-  // Acknowledgment State
   const [ackNumber, setAckNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [followUpSent, setFollowUpSent] = useState(false);
 
-  // Category Total Fields Calculation for Platform-Wide >5 Field Pagination Engine
   const totalCategoryFields = category?.id === 'women-children' ? 7 : category?.id === 'financial' ? 6 : 5;
   const hasMultipleDetailsPages = totalCategoryFields > 5;
 
-  // Generate random captcha code
   const generateCaptcha = () => {
     const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz';
     let code = '';
@@ -80,7 +71,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     setUserCaptcha('');
   };
 
-  // Timer effect for OTP resend
   useEffect(() => {
     let interval = null;
     if (otpTimer > 0) {
@@ -89,28 +79,26 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     return () => clearInterval(interval);
   }, [otpTimer]);
 
-  // Handle Send OTP in Citizen Login step
   const handleSendOtp = (e) => {
     if (e) e.preventDefault();
     setAuthError('');
     if (!citizenMobile || citizenMobile.length !== 10 || !/^\d+$/.test(citizenMobile)) {
-      setAuthError('Please enter a valid 10-digit mobile number.');
+      setAuthError(t('validation.invalidMobile'));
       return;
     }
 
     if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-      setAuthError('Invalid Captcha code. Please re-enter Captcha.');
+      setAuthError(t('validation.invalidCaptchaCode'));
       generateCaptcha();
       return;
     }
 
     setOtpSent(true);
     setOtpTimer(30);
-    setOtpInput('849201'); // Pre-fill simulated 6-digit OTP for instant testing
+    setOtpInput('849201');
     generateCaptcha();
   };
 
-  // Feature: Speak Complaint (Voice Input Simulation)
   const handleToggleVoice = () => {
     if (isRecordingVoice) {
       setIsRecordingVoice(false);
@@ -122,7 +110,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           if (prev >= 3) {
             clearInterval(timer);
             setIsRecordingVoice(false);
-            const voiceText = `Incident report for ${category?.title}. Details captured via voice intake. Suspect handle @cyber_suspect_99.`;
+            const voiceText = `Incident report for ${t(category.titleKey)}. Details captured via voice intake. Suspect handle @cyber_suspect_99.`;
             setDescription((p) => (p ? `${p}\n${voiceText}` : voiceText));
             autoExtractFromText(voiceText);
             setAttachedFiles((prevFiles) => [
@@ -137,7 +125,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }
   };
 
-  // Feature: Add Evidence File
   const handleFileUpload = (e, optionType = 'Evidence') => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
@@ -146,22 +133,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       setShowEvidenceMenu(false);
       setTimeout(() => {
         setIsAnalyzing(false);
-        const scannedText = `[Scanned ${optionType} from ${firstFile.name}]: Details extracted for ${category?.title}. Loss/Ref info: UTR 429184029102.`;
+        const scannedText = `[Scanned ${optionType} from ${firstFile.name}]: Details extracted for ${t(category.titleKey)}. Loss/Ref info: UTR 429184029102.`;
         setDescription((prev) => (prev ? `${prev}\n${scannedText}` : scannedText));
         autoExtractFromText(scannedText);
-        
+
         const fileNames = files.map((f) => f.name);
         setAttachedFiles((prevFiles) => [...prevFiles, ...fileNames]);
       }, 1000);
     }
   };
 
-  // Feature: Delete Evidence Item from Summary Card
   const handleDeleteEvidence = (indexToDelete) => {
     setAttachedFiles((prev) => prev.filter((_, idx) => idx !== indexToDelete));
   };
 
-  // Feature: Quick Add Evidence from Summary Card
   const handleQuickAddEvidenceFromCard = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
@@ -170,19 +155,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }
   };
 
-  // Smart Auto-Fill & Extraction Engine
   const autoExtractFromText = (text) => {
     const textLower = text.toLowerCase();
-    
-    // Extract Financial Loss
+
     const amountMatch = text.match(/(?:rs\.?|inr|₹|\$)\s*([\d,]+)/i) || text.match(/(\d{4,6})\s*(?:debited|lost|transferred|rupees)/i);
     const extractedLoss = amountMatch ? amountMatch[1].replace(/,/g, '') : incidentFields.financialLoss;
 
-    // Extract UTR / Transaction Ref
     const utrMatch = text.match(/(?:utr|txn|ref|transaction)\s*[:#-]?\s*([a-z0-9]{8,18})/i);
     const extractedUtr = utrMatch ? utrMatch[1] : incidentFields.transactionRef;
 
-    // Extract Suspect Handle / Phone / UPI
     const handleMatch = text.match(/@[a-zA-Z0-9._]+/);
     const phoneMatch = text.match(/(?:\+91\s*|0)?([6-9]\d{9})/);
     const upiMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z]{3,})/);
@@ -191,7 +172,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     else if (upiMatch) extractedSuspect = `UPI: ${upiMatch[0]}`;
     else if (phoneMatch) extractedSuspect = `+91 ${phoneMatch[1]}`;
 
-    // Extract Platform
     let extractedPlatform = incidentFields.platform;
     if (textLower.includes('instagram')) extractedPlatform = 'Instagram';
     else if (textLower.includes('whatsapp')) extractedPlatform = 'WhatsApp';
@@ -207,7 +187,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }));
   };
 
-  // Evidence Strength Score Calculation
   const calculateEvidenceScore = () => {
     let score = 0;
     if (selectedSubCrime) score += 1;
@@ -217,14 +196,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   };
 
   const evidenceScore = calculateEvidenceScore();
-  const evidenceLevel = evidenceScore <= 1 ? 'WEAK' : evidenceScore === 2 ? 'OKAY' : 'STRONG';
+  const evidenceLevel = evidenceScore <= 1 ? t('incident.weak') : evidenceScore === 2 ? t('incident.okay') : t('incident.strong');
   const evidenceBadge = evidenceScore <= 1
     ? { bg: '#fef2f2', color: '#ef4444', border: '#fca5a5' }
     : evidenceScore === 2
     ? { bg: '#fffbeb', color: '#d97706', border: '#fcd34d' }
     : { bg: '#f0fdf4', color: '#16a34a', border: '#86efac' };
 
-  // Proceed Handler from Step 1
   const handleAnalyzeAndProceed = (directSubmit = false) => {
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -235,7 +213,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         if (isLoggedIn) {
           finalizeComplaint();
         } else {
-          setCurrentStep(3); // Go to Citizen Login Verification step if not logged in
+          setCurrentStep(3);
         }
       } else {
         setCurrentStep(2);
@@ -244,66 +222,62 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     }, 500);
   };
 
-  // Submit Handler for Final Complaint Registration
   const finalizeComplaint = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
       const generatedAck = 'NCRP-2026-' + Math.floor(100000 + Math.random() * 900000);
       setAckNumber(generatedAck);
-      setCurrentStep(4); // Registration Receipt Screen
+      setCurrentStep(4);
     }, 1000);
   };
 
-  // Submit Handler for Citizen Verification step
   const handleCitizenAuthAndFinalize = (e) => {
     if (e) e.preventDefault();
     setAuthError('');
 
     if (loginTab === 'otp') {
       if (!otpSent) {
-        setAuthError('Please click "Get OTP" to request your verification code.');
+        setAuthError(t('validation.requestOtpFirst'));
         return;
       }
       if (!otpInput || otpInput.length !== 6) {
-        setAuthError('Please enter the 6-digit OTP.');
+        setAuthError(t('validation.enterOtp'));
         return;
       }
     } else {
       if (!citizenUserId.trim()) {
-        setAuthError('Please enter your Citizen User ID.');
+        setAuthError(t('validation.enterUserId'));
         return;
       }
       if (!citizenPassword) {
-        setAuthError('Please enter your Password.');
+        setAuthError(t('validation.enterPassword'));
         return;
       }
       if (userCaptcha.trim().toLowerCase() !== captchaCode.toLowerCase()) {
-        setAuthError('Invalid Captcha code. Please re-enter Captcha.');
+        setAuthError(t('validation.invalidCaptchaCode'));
         generateCaptcha();
         return;
       }
     }
 
     if (!isDeclarationAccepted) {
-      setAuthError('Please check the terms and policy declaration box to proceed.');
+      setAuthError(t('validation.checkDeclaration'));
       return;
     }
 
-    setIsLoggedIn(true); // Mark citizen session as logged in
+    setIsLoggedIn(true);
     finalizeComplaint();
   };
 
-  // Category-specific Action Button Label
   const getActionBtnLabel = () => {
-    if (category?.id === 'women-children') return '📸 Add Evidence';
-    if (category?.id === 'financial') return '📸 Scan Receipt / Screenshot';
-    if (category?.id === 'identity') return '📸 Upload Profile / Chat Screenshot';
-    if (category?.id === 'technical') return '📸 Attach Log / System Report';
-    return '📸 Scan Screenshot / Receipt';
+    if (category?.id === 'women-children') return t('incident.evidenceAddEvidence');
+    if (category?.id === 'financial') return t('incident.evidenceScanReceipt');
+    if (category?.id === 'identity') return t('incident.evidenceUploadProfile');
+    if (category?.id === 'technical') return t('incident.evidenceAttachLog');
+    return t('incident.evidenceScanScreenshot');
   };
 
-  // Case Summary Component (Persists dynamically across Steps 1, 2, and 3 for ALL categories)
   const renderCaseSummaryCard = () => (
     <div style={{
       background: '#ffffff',
@@ -316,24 +290,21 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       position: 'sticky',
       top: '20px'
     }}>
-      {/* Case Summary Header */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#fafafa' }}>
         <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-          CASE SUMMARY
+          {t('incident.caseSummary')}
         </h3>
       </div>
 
-      {/* Case ID & Evidence Strength */}
       <div style={{ padding: '18px 20px', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', letterSpacing: '0.5px', marginBottom: '14px' }}>
           {ackNumber ? ackNumber : 'NCRP-2026 - XXXXX'}
         </div>
 
-        {/* Evidence Strength Meter */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.5px' }}>
-              EVIDENCE STRENGTH
+              {t('incident.evidenceStrength')}
             </span>
             <span style={{
               fontSize: '0.68rem',
@@ -349,7 +320,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </span>
           </div>
 
-          {/* Multi-Segment Color Bar */}
           <div style={{ display: 'flex', gap: '4px', height: '8px', borderRadius: '4px', overflow: 'hidden', background: '#e2e8f0' }}>
             <div style={{ flex: 1, background: '#ef4444', opacity: evidenceScore >= 1 ? 1 : 0.25, transition: 'all 0.3s' }} />
             <div style={{ flex: 1, background: '#f59e0b', opacity: evidenceScore >= 2 ? 1 : 0.25, transition: 'all 0.3s' }} />
@@ -357,61 +327,59 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.68rem', color: '#94a3b8', fontWeight: 600 }}>
-            <span>WEAK</span>
-            <span>OKAY</span>
-            <span>STRONG</span>
+            <span>{t('incident.weak')}</span>
+            <span>{t('incident.okay')}</span>
+            <span>{t('incident.strong')}</span>
           </div>
         </div>
       </div>
 
-      {/* Dynamic Category & Sub-Category Summary Rows */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
-          <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>CATEGORY</span>
-          <span style={{ fontWeight: 600, color: '#0f172a' }}>{category?.title}</span>
+          <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>{t('incident.category')}</span>
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>{t(category.titleKey)}</span>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
-          <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>SUB-CATEGORY</span>
+          <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>{t('incident.subCategory')}</span>
           <span style={{ fontWeight: 600, color: selectedSubCrime ? '#0f172a' : '#94a3b8' }}>
-            {selectedSubCrime ? selectedSubCrime.name : 'Not selected yet'}
+            {selectedSubCrime ? t(selectedSubCrime.nameKey) : t('incident.notSelectedYet')}
           </span>
         </div>
 
         {incidentFields.financialLoss && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
-            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>LOSS AMOUNT</span>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>{t('incident.lossAmount')}</span>
             <span style={{ fontWeight: 700, color: '#b91c1c' }}>₹{incidentFields.financialLoss}</span>
           </div>
         )}
 
         {incidentFields.transactionRef && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
-            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>UTRN / REF</span>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>{t('incident.utrnRef')}</span>
             <span style={{ fontWeight: 600, color: '#0f172a' }}>{incidentFields.transactionRef}</span>
           </div>
         )}
 
         {incidentFields.platform && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
-            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>PLATFORM</span>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>{t('incident.platform')}</span>
             <span style={{ fontWeight: 600, color: '#0f172a' }}>{incidentFields.platform}</span>
           </div>
         )}
 
         {incidentFields.suspectDetails && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }}>
-            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>SUSPECT</span>
+            <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.76rem', letterSpacing: '0.4px' }}>{t('incident.suspect')}</span>
             <span style={{ fontWeight: 600, color: '#0f172a' }}>{incidentFields.suspectDetails}</span>
           </div>
         )}
       </div>
 
-      {/* Evidence Section with Delete and Direct Add Controls */}
       <div style={{ padding: '16px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
           <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.4px' }}>
-            EVIDENCE
+            {t('incident.evidence')}
           </span>
           <label style={{
             fontSize: '0.74rem',
@@ -425,7 +393,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             alignItems: 'center',
             gap: '4px'
           }}>
-            + Add Evidence
+            {t('incident.addEvidence')}
             <input type="file" multiple accept="image/*,.pdf,.aac,.mp3,.mp4" onChange={handleQuickAddEvidenceFromCard} style={{ display: 'none' }} />
           </label>
         </div>
@@ -451,7 +419,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 </span>
                 <button
                   type="button"
-                  title="Delete evidence"
+                  title={t('incident.deleteEvidence')}
                   onClick={() => handleDeleteEvidence(idx)}
                   style={{
                     background: 'none',
@@ -470,7 +438,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           </div>
         ) : (
           <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '4px 0' }}>
-            No evidence added yet
+            {t('incident.noEvidence')}
           </div>
         )}
       </div>
@@ -478,24 +446,23 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
     </div>
   );
 
-  // Progressive Header Steps Definition (Dynamic depending on isLoggedIn state!)
   const stepsList = isLoggedIn
     ? [
-        { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
-        { num: 2, title: 'Incident Details', detail: 'Primary & Additional Fields' },
-        { num: 3, title: 'Registration', detail: 'Acknowledgment number' }
+        { num: 1, title: t('incident.step1Title'), detail: t('incident.step1Detail') },
+        { num: 2, title: t('incident.step2Title'), detail: t('incident.step2Detail') },
+        { num: 3, title: t('incident.step3TitleRegister'), detail: t('incident.step3DetailRegister') }
       ]
     : [
-        { num: 1, title: 'Register Incident', detail: 'Voice, Text or Photo' },
-        { num: 2, title: 'Incident Details', detail: 'Primary & Additional Fields' },
-        { num: 3, title: 'Citizen Login', detail: 'Mobile OTP Verification' },
-        { num: 4, title: 'Registration', detail: 'Acknowledgment number' }
+        { num: 1, title: t('incident.step1Title'), detail: t('incident.step1Detail') },
+        { num: 2, title: t('incident.step2Title'), detail: t('incident.step2Detail') },
+        { num: 3, title: t('incident.step3TitleLogin'), detail: t('incident.step3DetailLogin') },
+        { num: 4, title: t('incident.step4Title'), detail: t('incident.step4Detail') }
       ];
 
   const activeStepNum = isLoggedIn
     ? (currentStep === 4 || currentStep === 3 ? 3 : currentStep)
     : currentStep;
-  
+
   const progressPercent = (activeStepNum / stepsList.length) * 100;
   const showSummarySideCard = currentStep !== 4;
 
@@ -507,8 +474,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       textAlign: 'left',
       transition: 'max-width 0.3s ease'
     }}>
-      
-      {/* Back Navigation Button */}
+
       <div style={{ marginBottom: '16px' }}>
         <button
           type="button"
@@ -525,11 +491,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             padding: 0,
             fontSize: '0.95rem'
           }}>
-          ← {currentLang === 'hi' ? 'श्रेणियों पर वापस जाएं' : 'Back to All Categories'}
+          ← {t('incident.backToCategories')}
         </button>
       </div>
 
-      {/* Progressive Disclosure Header (Visible Progress Bar) */}
       <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
           {stepsList.map((s) => (
@@ -565,17 +530,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
         </div>
       </div>
 
-      {/* Main Grid Wrapper */}
       <div style={showSummarySideCard ? { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' } : {}}>
         
-        {/* Left Form Area */}
         <div>
 
-          {/* STEP 1: DYNAMIC EXPRESS INTAKE LAYOUT FOR ALL CATEGORIES */}
           {currentStep === 1 && (
             <div className="ux4g-wireframe-card">
               
-              {/* Header with Icon Box + Category Title */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
                 <div style={{
                   width: '44px',
@@ -590,14 +551,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   <CategoryIcon categoryId={category?.id} size={24} color="#0b2e59" />
                 </div>
                 <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.5px' }}>
-                  {category.title}
+                  {t(category.titleKey)}
                 </h2>
               </div>
 
-              {/* Sub-Category Selector Pills with Red Star */}
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
-                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> SELECT THE SPECIFIC TYPE OF INCIDENT THAT OCCURED
+                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.selectIncidentType')}
                 </label>
                 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -609,23 +569,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         type="button"
                         onClick={() => setSelectedSubCrime(sub)}
                         className={`ux4g-pill-chip ${isSelected ? 'selected' : ''}`}>
-                        {sub.name}
+                        {t(sub.nameKey)}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Description Section with Red Star + Fast Intake Buttons */}
               <div style={{ marginTop: '32px', marginBottom: '16px', position: 'relative' }}>
                 <label style={{ display: 'block', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b', marginBottom: '12px', letterSpacing: '-0.3px' }}>
-                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> GIVE DESCRIPTION OF THE INCIDENT
+                  <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.giveDescription')}
                 </label>
 
-                {/* Fast Input Action Buttons */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', flexWrap: 'wrap', position: 'relative' }}>
                   
-                  {/* Speak Complaint Button */}
                   <button
                     type="button"
                     onClick={handleToggleVoice}
@@ -643,10 +600,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       gap: '8px'
                     }}
                     className={isRecordingVoice ? 'ux4g-voice-pulse' : ''}>
-                    🎙️ {isRecordingVoice ? `Recording... (${voiceTimer}s)` : 'Speak Complaint'}
+                    🎙️ {isRecordingVoice ? t('incident.recording', { seconds: voiceTimer }) : t('incident.speakComplaint')}
                   </button>
 
-                  {/* Dynamic Evidence Action Button */}
                   <button
                     type="button"
                     onClick={() => setShowEvidenceMenu(!showEvidenceMenu)}
@@ -663,10 +619,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       alignItems: 'center',
                       gap: '8px'
                     }}>
-                    {isAnalyzing ? 'Scanning Evidence...' : `${getActionBtnLabel()} ▾`}
+                    {isAnalyzing ? t('incident.scanningEvidence') : `${getActionBtnLabel()} ▾`}
                   </button>
 
-                  {/* Multiple Evidence Options Dropdown Menu */}
                   {showEvidenceMenu && (
                     <div style={{
                       position: 'absolute',
@@ -684,15 +639,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       gap: '4px'
                     }}>
                       <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        Select Evidence Type to Upload:
+                        {t('incident.selectEvidenceType')}
                       </div>
 
                       {[
-                        { label: '🖼️ Screenshot / Image File', type: 'Screenshot' },
-                        { label: '💬 Chat Log / Message Export', type: 'Chat Log' },
-                        { label: '🎙️ Audio / Voice Recording', type: 'Voice Audio' },
-                        { label: '📄 PDF Report / Document', type: 'PDF Document' },
-                        { label: '🧾 Payment Receipt / Invoice', type: 'Receipt' },
+                        { label: t('incident.evidenceScreenshot'), type: 'Screenshot' },
+                        { label: t('incident.evidenceChatLog'), type: 'Chat Log' },
+                        { label: t('incident.evidenceAudio'), type: 'Voice Audio' },
+                        { label: t('incident.evidencePdf'), type: 'PDF Document' },
+                        { label: t('incident.evidenceReceipt'), type: 'Receipt' },
                       ].map((opt, idx) => (
                         <label key={idx} style={{
                           padding: '8px 12px',
@@ -721,11 +676,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
                 </div>
 
-                {/* Textarea Input Box */}
                 <textarea
                   className="ux4g-input"
                   rows={5}
-                  placeholder="Describe what Happened (e.g date/time step by step)"
+                  placeholder={t('incident.describeWhatHappened')}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   style={{
@@ -738,14 +692,13 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 />
               </div>
 
-              {/* Primary Action Buttons matching wireframe layout */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <button
                   type="button"
                   className="ux4g-btn-dark-navy"
                   disabled={isAnalyzing}
                   onClick={() => handleAnalyzeAndProceed(false)}>
-                  {isAnalyzing ? 'Analyzing...' : 'Analyze & Review Details →'}
+                  {isAnalyzing ? t('incident.analyzing') : t('incident.analyzeAndReview')}
                 </button>
 
                 <button
@@ -753,24 +706,22 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   className="ux4g-btn-outline-navy"
                   disabled={isAnalyzing}
                   onClick={() => handleAnalyzeAndProceed(true)}>
-                  Direct 1-Click Register (Fastest)
+                  {t('incident.directRegister')}
                 </button>
               </div>
 
             </div>
           )}
 
-          {/* STEP 2: DYNAMIC CATEGORY-SPECIFIC INCIDENT DETAILS */}
           {currentStep === 2 && (
             <div className="ux4g-card">
               
-              {/* Header Title */}
               <div style={{ marginBottom: '20px' }}>
                 <h2 style={{ margin: '0 0 4px 0', fontSize: '1.35rem', color: '#0f172a', fontWeight: 700, letterSpacing: '-0.4px' }}>
-                  {detailsPage === 1 ? 'Incident Details' : 'Additional Incident Details'}
+                  {detailsPage === 1 ? t('incident.incidentDetails') : t('incident.additionalIncidentDetails')}
                 </h2>
                 <div style={{ fontSize: '0.86rem', color: '#64748b' }}>
-                  Confirm or complete the details below before official case registration.
+                  {t('incident.confirmDetails')}
                 </div>
               </div>
 
@@ -779,24 +730,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 if (hasMultipleDetailsPages && detailsPage === 1) {
                   setDetailsPage(2);
                 } else if (isLoggedIn) {
-                  // Direct registration if already logged in!
                   finalizeComplaint();
                 } else {
-                  // Move to Citizen Login / Verification Step if not logged in
                   setCurrentStep(3);
                 }
               }}>
                 
-                {/* PAGE 1: PRIMARY FIELDS */}
                 {detailsPage === 1 && (
                   <>
-                    {/* Common Field 1: Incident Date & Time */}
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Date & Time
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.incidentDateTime')}
                         </label>
-                        <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                        <span className="ux4g-confidence-badge">{t('incident.preFilled')}</span>
                       </div>
                       <input
                         type="datetime-local"
@@ -807,18 +754,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       />
                     </div>
 
-                    {/* DYNAMIC CATEGORY FIELDS */}
-
-                    {/* 1. FINANCIAL FRAUD FIELDS */}
                     {category?.id === 'financial' && (
                       <>
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Financial Loss Amount (₹)
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.financialLossAmount')}
                             </label>
                             {incidentFields.financialLoss && (
-                              <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                              <span className="ux4g-confidence-badge">{t('incident.autoExtracted')}</span>
                             )}
                           </div>
                           <input
@@ -834,10 +778,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Bank Txn Ref / UTR Number
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.bankTxnRef')}
                             </label>
                             {incidentFields.transactionRef && (
-                              <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                              <span className="ux4g-confidence-badge">{t('incident.autoExtracted')}</span>
                             )}
                           </div>
                           <input
@@ -853,9 +797,9 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              Victim Bank Name
+                              {t('incident.victimBankName')}
                             </label>
-                            <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                            <span className="ux4g-confidence-badge">{t('incident.preFilled')}</span>
                           </div>
                           <input
                             type="text"
@@ -868,7 +812,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              Suspect UPI ID / Mobile / Bank Account
+                              {t('incident.suspectUpiMobile')}
                             </label>
                           </div>
                           <input
@@ -882,16 +826,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       </>
                     )}
 
-                    {/* 2. WOMEN & CHILDREN FIELDS */}
                     {category?.id === 'women-children' && (
                       <>
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Suspect Handle / Phone / Profile
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.suspectHandle')}
                             </label>
                             {incidentFields.suspectDetails && (
-                              <span className="ux4g-confidence-badge">✓ Auto-Extracted</span>
+                              <span className="ux4g-confidence-badge">{t('incident.autoExtracted')}</span>
                             )}
                           </div>
                           <input
@@ -907,10 +850,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Social Media / Platform
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.socialMediaPlatform')}
                             </label>
                             {incidentFields.platform && (
-                              <span className="ux4g-confidence-badge">✓ Auto-Detected</span>
+                              <span className="ux4g-confidence-badge">{t('incident.autoDetected')}</span>
                             )}
                           </div>
                           <select
@@ -931,7 +874,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              Incident Content Type
+                              {t('incident.incidentContentType')}
                             </label>
                           </div>
                           <input
@@ -945,13 +888,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       </>
                     )}
 
-                    {/* 3. IDENTITY FRAUD / OTHER CATEGORIES DEFAULT FIELDS */}
                     {category?.id !== 'financial' && category?.id !== 'women-children' && (
                       <>
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Target Platform / Website / Account
+                              <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.targetPlatform')}
                             </label>
                           </div>
                           <input
@@ -967,7 +909,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                             <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              Suspect Details / Contact
+                              {t('incident.suspectDetailsContact')}
                             </label>
                           </div>
                           <input
@@ -981,13 +923,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       </>
                     )}
 
-                    {/* Common Field 5: Incident Location Context */}
                     <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> Incident Location / Network City
+                          <span style={{ color: '#d93025', marginRight: '4px' }}>*</span> {t('incident.incidentLocation')}
                         </label>
-                        <span className="ux4g-confidence-badge">✓ Pre-Filled</span>
+                        <span className="ux4g-confidence-badge">{t('incident.preFilled')}</span>
                       </div>
                       <input
                         type="text"
@@ -1000,13 +941,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </>
                 )}
 
-                {/* PAGE 2: SECONDARY FIELDS (IF >5 FIELDS TOTAL) */}
                 {detailsPage === 2 && (
                   <>
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          Secondary Suspect IP / Contact Email
+                          {t('incident.secondarySuspectIp')}
                         </label>
                       </div>
                       <input
@@ -1021,7 +961,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     <div className="ux4g-form-group" style={{ marginBottom: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
                         <label className="ux4g-label" style={{ margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          Witness Contact / Secondary Reference
+                          {t('incident.witnessContact')}
                         </label>
                       </div>
                       <input
@@ -1035,7 +975,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </>
                 )}
 
-                {/* Declaration Checkbox for Logged In Citizens */}
                 {isLoggedIn && (!hasMultipleDetailsPages || detailsPage === 2) && (
                   <div style={{
                     background: '#f8fafc',
@@ -1066,30 +1005,29 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         }}
                       />
                       <span style={{ fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.45 }}>
-                        I declare that the information provided is correct to the best of my knowledge under Indian Laws. I have read the{' '}
+                        {t('citizenVerification.declareText')}{' '}
                         <a
                           href="https://cybercrime.gov.in/Webform/FAQ.aspx"
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
                           onClick={(e) => e.stopPropagation()}>
-                          FAQ
+                          {t('citizenVerification.faq')}
                         </a>{' '}
-                        and agree to the portal's{' '}
+                        {t('citizenVerification.agreeToPrivacy')}{' '}
                         <a
                           href="https://cybercrime.gov.in/Webform/privacy_policy.aspx"
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
                           onClick={(e) => e.stopPropagation()}>
-                          Privacy Policy
+                          {t('citizenVerification.privacyPolicy')}
                         </a>.
                       </span>
                     </label>
                   </div>
                 )}
 
-                {/* Action Buttons */}
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button
                     type="button"
@@ -1101,7 +1039,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         setCurrentStep(1);
                       }
                     }}>
-                    ← Back
+                    ← {t('common.back')}
                   </button>
 
                   <button
@@ -1110,10 +1048,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     style={{ flex: 1 }}
                     disabled={isSubmitting || (isLoggedIn && (!hasMultipleDetailsPages || detailsPage === 2) && !isDeclarationAccepted)}>
                     {hasMultipleDetailsPages && detailsPage === 1
-                      ? 'Continue to Additional Details →'
+                      ? t('incident.continueToAdditional')
                       : isLoggedIn
-                      ? (isSubmitting ? 'Registering Complaint...' : 'Register Official Cyber Crime Complaint →')
-                      : 'Proceed to Citizen Verification →'}
+                      ? (isSubmitting ? t('incident.registeringComplaint') : t('incident.registerComplaint'))
+                      : t('incident.proceedToVerification')}
                   </button>
                 </div>
 
@@ -1122,37 +1060,33 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           )}
 
-          {/* STEP 3: FULL CITIZEN LOGIN & VERIFICATION STEP (SHOWN ONLY IF NOT LOGGED IN) */}
           {currentStep === 3 && !isLoggedIn && (
             <div className="ux4g-card">
               
-              {/* Header Title */}
               <div style={{ marginBottom: '20px' }}>
                 <h2 style={{ margin: '0 0 4px 0', fontSize: '1.4rem', color: '#0b2e59', fontWeight: 700 }}>
-                  Citizen Verification & Login
+                  {t('citizenVerification.title')}
                 </h2>
                 <div style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                  Authenticate your citizen identity before official complaint registration.
+                  {t('citizenVerification.subtitle')}
                 </div>
               </div>
 
-              {/* Authentication Mode Tabs */}
               <div className="ux4g-tabs" style={{ marginBottom: '20px' }}>
                 <button 
                   type="button"
                   className={`ux4g-tab-btn ${loginTab === 'otp' ? 'active' : ''}`}
                   onClick={() => { setLoginTab('otp'); setAuthError(''); }}>
-                  📱 Mobile OTP
+                  {t('citizenVerification.mobileOtp')}
                 </button>
                 <button 
                   type="button"
                   className={`ux4g-tab-btn ${loginTab === 'password' ? 'active' : ''}`}
                   onClick={() => { setLoginTab('password'); setAuthError(''); }}>
-                  🔑 User ID & Password
+                  {t('citizenVerification.userIdPassword')}
                 </button>
               </div>
 
-              {/* Error Alert */}
               {authError && (
                 <div className="ux4g-alert ux4g-alert-error" style={{ marginBottom: '16px', padding: '10px 14px', borderRadius: '8px' }}>
                   ⚠️ {authError}
@@ -1161,11 +1095,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
               <form onSubmit={handleCitizenAuthAndFinalize}>
                 {loginTab === 'otp' ? (
-                  /* TAB 1: Mobile OTP Flow */
                   <>
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <label className="ux4g-label">
-                        Registered Mobile Number <span style={{ color: '#d93025' }}>*</span>
+                        {t('citizenVerification.registeredMobile')} <span style={{ color: '#d93025' }}>*</span>
                       </label>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <div style={{ padding: '10px 14px', background: '#e9ecef', border: '1.5px solid #cbd5e1', borderRadius: '8px', fontWeight: 'bold', color: '#475569' }}>
@@ -1175,17 +1108,16 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                           type="tel"
                           maxLength={10}
                           className="ux4g-input"
-                          placeholder="Enter 10-digit mobile number"
+                          placeholder={t('login.placeholderMobile')}
                           value={citizenMobile}
                           onChange={(e) => setCitizenMobile(e.target.value)}
                         />
                       </div>
                     </div>
 
-                    {/* CAPTCHA SECTION */}
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <label className="ux4g-label">
-                        Enter Captcha Code <span style={{ color: '#d93025' }}>*</span>
+                        {t('citizenVerification.enterCaptchaCode')} <span style={{ color: '#d93025' }}>*</span>
                       </label>
                       <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
                         <div style={{
@@ -1205,14 +1137,14 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                           type="button"
                           onClick={generateCaptcha}
                           style={{ background: 'none', border: 'none', color: '#0b2e59', fontSize: '1.2rem', cursor: 'pointer' }}
-                          title="Refresh Captcha">
+                          title={t('captcha.refresh')}>
                           🔄
                         </button>
                       </div>
                       <input
                         type="text"
                         className="ux4g-input"
-                        placeholder="Type the 6-character captcha above"
+                        placeholder={t('captcha.typeCaptchaAbove')}
                         value={userCaptcha}
                         onChange={(e) => setUserCaptcha(e.target.value)}
                       />
@@ -1224,23 +1156,23 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                         className="ux4g-btn ux4g-btn-secondary ux4g-btn-block"
                         style={{ marginBottom: '20px' }}
                         onClick={handleSendOtp}>
-                        📲 Get OTP Code
+                        {t('citizenVerification.getOtpCode')}
                       </button>
                     ) : (
                       <div className="ux4g-form-group" style={{ marginBottom: '20px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                           <label className="ux4g-label" style={{ margin: 0 }}>
-                            Enter 6-Digit OTP <span style={{ color: '#d93025' }}>*</span>
+                            {t('citizenVerification.enter6DigitOtp')} <span style={{ color: '#d93025' }}>*</span>
                           </label>
                           <span style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>
-                            ✓ OTP Sent to +91 {citizenMobile}
+                            {t('otp.otpSentTo', { mobileNumber: citizenMobile })}
                           </span>
                         </div>
                         <input
                           type="text"
                           maxLength={6}
                           className="ux4g-input"
-                          placeholder="Enter 6-digit OTP code"
+                          placeholder={t('tracking.enter6DigitOtpCode')}
                           value={otpInput}
                           onChange={(e) => setOtpInput(e.target.value)}
                         />
@@ -1248,16 +1180,15 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     )}
                   </>
                 ) : (
-                  /* TAB 2: User ID & Password Flow */
                   <>
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <label className="ux4g-label">
-                        Citizen User ID <span style={{ color: '#d93025' }}>*</span>
+                        {t('citizenVerification.citizenUserId')} <span style={{ color: '#d93025' }}>*</span>
                       </label>
                       <input
                         type="text"
                         className="ux4g-input"
-                        placeholder="Enter registered User ID / Email"
+                        placeholder={t('login.placeholderUserId')}
                         value={citizenUserId}
                         onChange={(e) => setCitizenUserId(e.target.value)}
                       />
@@ -1265,21 +1196,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
                     <div className="ux4g-form-group" style={{ marginBottom: '16px' }}>
                       <label className="ux4g-label">
-                        Password <span style={{ color: '#d93025' }}>*</span>
+                        {t('citizenVerification.password')} <span style={{ color: '#d93025' }}>*</span>
                       </label>
                       <input
                         type="password"
                         className="ux4g-input"
-                        placeholder="Enter your password"
+                        placeholder={t('login.placeholderPassword')}
                         value={citizenPassword}
                         onChange={(e) => setCitizenPassword(e.target.value)}
                       />
                     </div>
 
-                    {/* CAPTCHA SECTION */}
                     <div className="ux4g-form-group" style={{ marginBottom: '20px' }}>
                       <label className="ux4g-label">
-                        Enter Captcha Code <span style={{ color: '#d93025' }}>*</span>
+                        {t('citizenVerification.enterCaptchaCode')} <span style={{ color: '#d93025' }}>*</span>
                       </label>
                       <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '8px' }}>
                         <div style={{
@@ -1299,14 +1229,14 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                           type="button"
                           onClick={generateCaptcha}
                           style={{ background: 'none', border: 'none', color: '#0b2e59', fontSize: '1.2rem', cursor: 'pointer' }}
-                          title="Refresh Captcha">
+                          title={t('captcha.refresh')}>
                           🔄
                         </button>
                       </div>
                       <input
                         type="text"
                         className="ux4g-input"
-                        placeholder="Type the 6-character captcha above"
+                        placeholder={t('captcha.typeCaptchaAbove')}
                         value={userCaptcha}
                         onChange={(e) => setUserCaptcha(e.target.value)}
                       />
@@ -1314,7 +1244,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </>
                 )}
 
-                {/* Mandatory Terms & Declaration Checkbox Box */}
                 <div style={{
                   background: '#f8fafc',
                   border: '1px solid #cbd5e1',
@@ -1344,35 +1273,34 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                       }}
                     />
                     <span style={{ fontSize: '0.84rem', color: '#1e293b', lineHeight: 1.45 }}>
-                      I declare that the information provided is correct to the best of my knowledge under Indian Laws. I have read the{' '}
+                      {t('citizenVerification.declareText')}{' '}
                       <a
                         href="https://cybercrime.gov.in/Webform/FAQ.aspx"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
                         onClick={(e) => e.stopPropagation()}>
-                        FAQ
+                        {t('citizenVerification.faq')}
                       </a>{' '}
-                      and agree to the portal's{' '}
+                      {t('citizenVerification.agreeToPrivacy')}{' '}
                       <a
                         href="https://cybercrime.gov.in/Webform/privacy_policy.aspx"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ color: '#0b2e59', fontWeight: 600, textDecoration: 'underline' }}
                         onClick={(e) => e.stopPropagation()}>
-                        Privacy Policy
+                        {t('citizenVerification.privacyPolicy')}
                       </a>.
                     </span>
                   </label>
                 </div>
 
-                {/* Clean Action Buttons */}
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button
                     type="button"
                     className="ux4g-btn ux4g-btn-secondary"
                     onClick={() => setCurrentStep(2)}>
-                    ← Back to Incident Details
+                    {t('citizenVerification.backToDetails')}
                   </button>
 
                   <button
@@ -1381,8 +1309,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     style={{ flex: 1 }}
                     disabled={isSubmitting || !isDeclarationAccepted}>
                     {isSubmitting
-                      ? 'Authenticating & Registering...'
-                      : 'Verify & Register Official Cyber Crime Complaint →'}
+                      ? t('citizenVerification.authenticatingAndRegistering')
+                      : t('citizenVerification.verifyAndRegister')}
                   </button>
                 </div>
 
@@ -1391,14 +1319,11 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
             </div>
           )}
 
-          {/* STEP 4: REGISTERED CONFIRMATION SCREEN */}
           {currentStep === 4 && (
             <div>
               
-              {/* Main Official Registration Card */}
               <div className="ux4g-card" style={{ textAlign: 'left', padding: '32px 36px' }}>
                 
-                {/* Header Success Row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
                   <div style={{
                     width: '44px',
@@ -1417,15 +1342,14 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   </div>
                   <div>
                     <h2 style={{ margin: 0, color: '#0b2e59', fontSize: '1.45rem', fontWeight: 800 }}>
-                      Complaint Successfully Registered!
+                      {t('complaintSuccess.title')}
                     </h2>
                     <div style={{ color: '#64748b', fontSize: '0.92rem', marginTop: '2px' }}>
-                      Your case is saved in the National Cyber Crime Reporting System.
+                      {t('complaintSuccess.subtitle')}
                     </div>
                   </div>
                 </div>
 
-                {/* Official Acknowledgment Number Card */}
                 <div style={{
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
@@ -1434,7 +1358,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                   marginBottom: '24px'
                 }}>
                   <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.6px', textTransform: 'uppercase' }}>
-                    OFFICIAL ACKNOWLEDGMENT NUMBER
+                    {t('complaintSuccess.officialAcknowledgmentNumber')}
                   </div>
 
                   <div style={{ fontSize: '2.1rem', fontWeight: 800, color: '#0b2e59', letterSpacing: '1px', margin: '6px 0 14px 0' }}>
@@ -1443,22 +1367,21 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     <span style={{ background: '#dcfce7', color: '#166534', fontWeight: 600, fontSize: '0.84rem', padding: '5px 14px', borderRadius: '14px' }}>
-                      Status: Assigned to State Cyber Cell
+                      {t('complaintSuccess.statusAssigned')}
                     </span>
                     <span style={{ background: '#e2e8f0', color: '#334155', fontWeight: 600, fontSize: '0.84rem', padding: '5px 14px', borderRadius: '14px' }}>
-                      Category: {category?.title} {selectedSubCrime ? `(${selectedSubCrime.name})` : ''}
+                      {t('incident.category')}: {t(category.titleKey)} {selectedSubCrime ? `(${t(selectedSubCrime.nameKey)})` : ''}
                     </span>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     className="ux4g-btn-outline-navy"
                     style={{ padding: '10px 20px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     onClick={() => window.print()}>
-                    🖨️ Print Official Receipt
+                    {t('complaintSuccess.printReceipt')}
                   </button>
 
                   <button
@@ -1466,13 +1389,12 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     className="ux4g-btn-dark-navy"
                     style={{ padding: '10px 24px', borderRadius: '8px' }}
                     onClick={onBackToCategories}>
-                    Return to Dashboard
+                    {t('complaintSuccess.returnToDashboard')}
                   </button>
                 </div>
 
               </div>
 
-              {/* Dashed Box Below: Add Evidence Documents (Optional Follow-Up) */}
               <div style={{
                 border: '1.5px dashed #94a3b8',
                 borderRadius: '16px',
@@ -1481,22 +1403,20 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 marginTop: '24px',
                 textAlign: 'left'
               }}>
-                {/* Header Row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '10px' }}>
                   <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    📎 Add Evidence Documents (Optional Follow-Up)
+                    📎 {t('followUp.addEvidenceDocuments')}
                   </div>
 
                   <span style={{ background: '#e0f2fe', color: '#0369a1', fontWeight: 600, fontSize: '0.8rem', padding: '4px 12px', borderRadius: '12px' }}>
-                    Does not block registered case
+                    {t('followUp.doesNotBlock')}
                   </span>
                 </div>
 
                 <div style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.4, marginBottom: '18px' }}>
-                  Upload screenshots, payment receipts, bank statement PDFs, or chat history now or send a link to upload later when you have time.
+                  {t('followUp.uploadDescription')}
                 </div>
 
-                {/* Drag & Drop Dropzone Box */}
                 <div style={{
                   border: '1px dashed #cbd5e1',
                   borderRadius: '12px',
@@ -1506,10 +1426,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 }}>
                   <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📁</div>
                   <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem', marginBottom: '4px' }}>
-                    Drag & drop evidence files here
+                    {t('followUp.dragDrop')}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '14px' }}>
-                    Supports JPG, PNG, PDF (Max 10MB each)
+                    {t('followUp.supportsFormats')}
                   </div>
 
                   <label style={{
@@ -1523,12 +1443,11 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     cursor: 'pointer',
                     display: 'inline-block'
                   }}>
-                    Browse Files
+                    {t('followUp.browseFiles')}
                     <input type="file" multiple accept="image/*,.pdf,.aac,.mp3,.mp4" onChange={handleQuickAddEvidenceFromCard} style={{ display: 'none' }} />
                   </label>
                 </div>
 
-                {/* Mobile/Desktop Link Box */}
                 <div style={{
                   border: '1px solid #e2e8f0',
                   borderRadius: '10px',
@@ -1543,10 +1462,10 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                 }}>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>
-                      📱 Uploading from Mobile or Desktop later?
+                      📱 {t('followUp.uploadingFromMobile')}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
-                      Send an upload link to your SMS/Email so you can upload documents whenever ready.
+                      {t('followUp.sendUploadLinkDesc')}
                     </div>
                   </div>
 
@@ -1555,7 +1474,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
                     className="ux4g-btn-outline-navy"
                     style={{ fontSize: '0.84rem', padding: '8px 16px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
                     onClick={() => setFollowUpSent(true)}>
-                    {followUpSent ? '✓ Upload Link Sent!' : '📲 Send Upload Link'}
+                    {followUpSent ? '✓ ' + t('followUp.uploadLinkSent') : '📲 ' + t('followUp.sendUploadLink')}
                   </button>
                 </div>
 
@@ -1566,7 +1485,6 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
 
         </div>
 
-        {/* Right Side Bar (Persistent Case Summary Card dynamically active for ALL categories in Steps 1, 2 & 3) */}
         {showSummarySideCard && renderCaseSummaryCard()}
 
       </div>
