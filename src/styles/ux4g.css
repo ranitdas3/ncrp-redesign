@@ -444,16 +444,18 @@ img, svg, video {
   .ux4g-btn-grid {
     grid-template-columns: 1fr !important;
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: column-reverse !important;
     gap: 12px !important;
   }
 
   .ux4g-mobile-btn-wrap {
-    flex-direction: column !important;
+    display: flex !important;
+    flex-direction: column-reverse !important;
     gap: 10px !important;
   }
 
-  .ux4g-mobile-btn-wrap button {
+  .ux4g-mobile-btn-wrap button,
+  .ux4g-btn-grid button {
     width: 100% !important;
   }
 }
