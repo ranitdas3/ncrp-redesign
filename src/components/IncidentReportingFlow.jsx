@@ -535,8 +535,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
       {/* Progressive Disclosure Header (Visible Progress Bar) */}
       <div style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '16px', padding: '16px 20px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
         
-        {/* DESKTOP STEPPER (4 Horizontal Columns) */}
-        <div className="ux4g-desktop-stepper" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        {/* DESKTOP STEPPER (4 Horizontal Columns - Hidden on Mobile) */}
+        <div className="ux4g-desktop-stepper">
           {stepsList.map((s) => (
             <div key={s.num} style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: activeStepNum >= s.num ? 1 : 0.4 }}>
               <div style={{
@@ -561,8 +561,8 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
           ))}
         </div>
 
-        {/* MOBILE STEPPER (Clean Compact Row for Mobile Screens) */}
-        <div className="ux4g-mobile-stepper" style={{ marginBottom: '10px' }}>
+        {/* MOBILE STEPPER (Clean Compact Row - Shown ONLY on Mobile <= 768px) */}
+        <div className="ux4g-mobile-stepper">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0b2e59', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
