@@ -11,15 +11,17 @@ import GovtFooter from './components/GovtFooter';
 export default function App() {
   const [currentView, setCurrentView] = useState('categories'); // 'categories', 'wizard', 'login', 'track'
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubCrime, setSelectedSubCrime] = useState(null);
   
   // Accessibility & Localization State
   const [fontSize, setFontSize] = useState('md'); // 'sm', 'md', 'lg'
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [currentLang, setCurrentLang] = useState('en'); // 'en', 'hi', 'bn', etc.
 
-  // Handle Category Selection from Dashboard Card
-  const handleSelectCategory = (category) => {
+  // Handle Category Selection from Dashboard Card / Search Result
+  const handleSelectCategory = (category, subCrime = null) => {
     setSelectedCategory(category);
+    setSelectedSubCrime(subCrime);
     setCurrentView('wizard');
   };
 
@@ -121,6 +123,7 @@ export default function App() {
         {currentView === 'wizard' && selectedCategory && (
           <IncidentReportingFlow
             category={selectedCategory}
+            initialSubCrime={selectedSubCrime}
             currentLang={currentLang}
             onBackToCategories={() => setCurrentView('categories')}
           />

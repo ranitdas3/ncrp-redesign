@@ -609,3 +609,33 @@ img, svg, video {
     font-size: 0.8rem !important;
   }
 }
+
+/* Search Bar Component Styling */
+.ux4g-search-bar-wrapper:focus-within {
+  border-color: #FF9933 !important;
+  box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.25) !important;
+}
+
+.ux4g-search-cta-btn:hover {
+  background-color: #08264d !important;
+}
+
+.ux4g-theme-high-contrast .ux4g-search-bar-wrapper {
+  background-color: #000000 !important;
+  border-color: #FFFF00 !important;
+}
+
+.ux4g-theme-high-contrast .ux4g-search-bar-wrapper input {
+  color: #FFFFFF !important;
+}
+
+.ux4g-theme-high-contrast .ux4g-search-cta-btn {
+  background-color: #FFFF00 !important;
+  color: #000000 !important;
+}
+
+.ux4g-theme-high-contrast .ux4g-search-cta-btn svg {
+  fill: #000000 !important;
+}
+
+

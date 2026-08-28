@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CategoryIcon from './CategoryIcon';
 
-export default function IncidentReportingFlow({ category, currentLang, onBackToCategories, isLoggedIn: initialIsLoggedIn = false }) {
+export default function IncidentReportingFlow({ category, initialSubCrime = null, currentLang, onBackToCategories, isLoggedIn: initialIsLoggedIn = false }) {
   // Session Login State (Controllable via prop or interactive simulation toggle)
   const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn);
 
@@ -9,7 +9,7 @@ export default function IncidentReportingFlow({ category, currentLang, onBackToC
   const [detailsPage, setDetailsPage] = useState(1);
 
   // Sub-Crime Selection State
-  const [selectedSubCrime, setSelectedSubCrime] = useState(null);
+  const [selectedSubCrime, setSelectedSubCrime] = useState(initialSubCrime);
 
   // Intake State
   const [description, setDescription] = useState('');
